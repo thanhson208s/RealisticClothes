@@ -12,7 +12,7 @@ RealisticClothes.OnlyDegradeRepairableClothes = false
 RealisticClothes.BaseDegradingChance = 0.0
 RealisticClothes.DegradingFactorModifier = 1.0
 RealisticClothes.ChanceToDegradeOnFailure = 0.5
-RealisticClothes.Debug = true
+RealisticClothes.Debug = false
 
 -- Init all modifiers
 function RealisticClothes.onInitMod()

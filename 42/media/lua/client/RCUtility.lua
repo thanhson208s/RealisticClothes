@@ -294,10 +294,14 @@ function RealisticClothes.getStripType(fabricType)
 end
 
 function RealisticClothes.getRequiredLevelToCheck(item)
+    if not RealisticClothes.NeedTailoringLevel then return 0 end
+
     return math.max(RealisticClothes.CLOTHES_SLOTS[item:getBodyLocation()].difficulty - 1, 0)
 end
 
 function RealisticClothes.getCheckDuration(item)
+    if not RealisticClothes.NeedTailoringLevel then return 0 end
+
     return RealisticClothes.CLOTHES_SLOTS[item:getBodyLocation()].difficulty * 100
 end
 
