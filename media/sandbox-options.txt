@@ -1,0 +1,79 @@
+VERSION = 1,
+
+option RealisticClothes.NeedTailoringLevel
+{
+    type = boolean, default = true,
+    page = RealisticClothes, translation = RealisticClothes_NeedTailoringLevel,
+}
+
+option RealisticClothes.TailoringXpMultiplier
+{
+    type = double, min = 0.0, max = 100.0, default = 1.0, 
+    page = RealisticClothes, translation = RealisticClothes_TailoringXpMultiplier,
+}
+
+option RealisticClothes.RipChanceMultiplier
+{
+    type = double, min = 0.0, max = 100.0, default = 1.0,
+    page = RealisticClothes, translation = RealisticClothes_RipChanceMultiplier,
+}
+
+option RealisticClothes.DropChanceMultiplier
+{
+    type = double, min = 0.0, max = 100.0, default = 1.0,
+    page = RealisticClothes, translation = RealisticClothes_DropChanceMultiplier,
+}
+
+option RealisticClothes.InsulationReduceMultiplier
+{
+    type = double, min = 0.0, max = 100.0, default = 1.0,
+    page = RealisticClothes, translation = RealisticClothes_InsulationReduceMultiplier,
+}
+
+option RealisticClothes.CombatSpeedReduceMultiplier
+{
+    type = double, min = 0.0, max = 100.0, default = 1.0,
+    page = RealisticClothes, translation = RealisticClothes_CombatSpeedReduceMultiplier,
+}
+
+option RealisticClothes.IncreaseTripChanceMultiplier
+{
+    type = double, min = 0.0, max = 100.0, default = 1.0,
+    page = RealisticClothes, translation = RealisticClothes_IncreaseTripChanceMultiplier,
+}
+
+option RealisticClothes.IncreaseStiffnessMultiplier
+{
+    type = double, min = 0.0, max = 100.0, default = 1.0,
+    page = RealisticClothes, translation = RealisticClothes_IncreaseStiffnessMultiplier,
+}
+
+option RealisticClothes.EnableClothesDegrading
+{
+    type = boolean, default = true,
+    page = RealisticClothes, translation = RealisticClothes_EnableClothesDegrading,
+}
+
+option RealisticClothes.OnlyDegradeRepairableClothes
+{
+    type = boolean, default = false,
+    page = RealisticClothes, translation = RealisticClothes_OnlyDegradeRepairableClothes,
+}
+
+option RealisticClothes.MinDaysToDegrade
+{
+    type = integer, min = 1, max = 720, default = 30,
+    page = RealisticClothes, translation = RealisticClothes_MinDaysToDegrade,
+}
+
+option RealisticClothes.MaxDaysToDegrade
+{
+    type = integer, min = 1, max = 720, default = 360,
+    page = RealisticClothes, translation = RealisticClothes_MaxDaysToDegrade,
+}
+
+option RealisticClothes.ChanceToDegradeOnFailure
+{
+    type = double, min = 0.0, max = 1.0, default = 0.5,
+    page = RealisticClothes, translation = RealisticClothes_ChanceToDegradeOnFailure,
+}
