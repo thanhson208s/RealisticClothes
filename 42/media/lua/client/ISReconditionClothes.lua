@@ -40,7 +40,7 @@ function ISReconditionClothes:perform()
     if ZombRandFloat(0, 1) < successChance then
         local potentialRepair = RealisticClothes.getPotentialRepairForRecondition(self.item, self.character)
         local conditionGain = math.ceil(potentialRepair * (self.item:getConditionMax() - self.item:getCondition()))
-        local repairedTimes = self.item:getHaveBeenRepaired() - 1
+        local repairedTimes = self.item:getHaveBeenRepaired()
         self.character:getXp():AddXP(Perks.Tailoring, RealisticClothes.getTailoringXpForRecondition(self.item, true))
         self.character:getXp():AddXP(Perks.Maintenance, conditionGain * 0.5 / (repairedTimes < 10 and (repairedTimes + 1) or 0))
 
