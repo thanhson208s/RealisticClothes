@@ -579,7 +579,7 @@ do -- Replace display name of inventory items to include clothes size
     local Clothing_getName = nil
 
     local function patchClothingGetName()
-        local mt = getmetatable(InventoryItemFactory.CreateItem("Base.SpiffoSuit")).__index
+        local mt = getmetatable(instanceItem("Base.SpiffoSuit")).__index
         Clothing_getName = mt.getName
         mt.getName = function(self)
             local name = Clothing_getName(self)
@@ -592,7 +592,7 @@ do -- Replace display name of inventory items to include clothes size
     end
 
     local function unpatchClothingGetName()
-        local mt = getmetatable(InventoryItemFactory.CreateItem("Base.SpiffoSuit")).__index
+        local mt = getmetatable(instanceItem("Base.SpiffoSuit")).__index
         mt.getName = Clothing_getName
         Clothing_getName = nil
     end

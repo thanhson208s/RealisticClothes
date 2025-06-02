@@ -432,7 +432,7 @@ end
 function RealisticClothes.getOriginalCombatSpeedModifier(item)
     local fullType = item:getFullType()
     if not RealisticClothes.OriginalCombatSpeedModifier[fullType] then
-        RealisticClothes.OriginalCombatSpeedModifier[fullType] = InventoryItemFactory.CreateItem(fullType):getCombatSpeedModifier()
+        RealisticClothes.OriginalCombatSpeedModifier[fullType] = instanceItem(fullType):getCombatSpeedModifier()
     end
 
     return RealisticClothes.OriginalCombatSpeedModifier[fullType]
