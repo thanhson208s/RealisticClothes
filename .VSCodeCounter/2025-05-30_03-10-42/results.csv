@@ -1,8 +1,0 @@
-"filename", "language", "Lua", "comment", "blank", "total"
-"c:\Users\PC\Zomboid\mods\RealisticClothes\media\lua\client\ISCheckClothesSize.lua", "Lua", 60, 0, 15, 75
-"c:\Users\PC\Zomboid\mods\RealisticClothes\media\lua\client\ISDownsizeClothes.lua", "Lua", 102, 2, 20, 124
-"c:\Users\PC\Zomboid\mods\RealisticClothes\media\lua\client\ISReconditionClothes.lua", "Lua", 71, 1, 16, 88
-"c:\Users\PC\Zomboid\mods\RealisticClothes\media\lua\client\ISUpsizeClothes.lua", "Lua", 100, 2, 20, 122
-"c:\Users\PC\Zomboid\mods\RealisticClothes\media\lua\client\RCUtility.lua", "Lua", 776, 17, 155, 948
-"c:\Users\PC\Zomboid\mods\RealisticClothes\media\lua\client\RealisticClothes.lua", "Lua", 540, 17, 94, 651
-"Total", "-", 1649, 39, 320, 2008

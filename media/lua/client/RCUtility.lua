@@ -300,12 +300,12 @@ function RealisticClothes.getRequiredLevelToCheck(item)
 end
 
 function RealisticClothes.getCheckDuration(item)
-    if not RealisticClothes.NeedTailoringLevel then return 0 end
-
     return RealisticClothes.CLOTHES_SLOTS[item:getBodyLocation()].difficulty * 100
 end
 
 function RealisticClothes.getRequiredLevelToChange(item, isUpsizing)
+    if not RealisticClothes.NeedTailoringLevel then return 0 end
+
     local difficulty = RealisticClothes.CLOTHES_SLOTS[item:getBodyLocation()].difficulty
     difficulty = difficulty + (RealisticClothes.FabricTypeDifficulty[item:getScriptItem():getFabricType()] or 0)
     if isUpsizing then difficulty = difficulty + 1 end
