@@ -617,7 +617,7 @@ end
 function RealisticClothes.getRemainingThread(threads)
     local total = 0
     for i = 0, threads:size() - 1 do
-        total = total + threads:get(i):getRemainingUses()
+        total = total + threads:get(i):getCurrentUses()
     end
     return total
 end
@@ -635,7 +635,7 @@ function RealisticClothes.getUsingThreads(threads, requiredThread)
     for i = 0, threads:size() - 1 do
         local thread = threads:get(i)
         if totalThreads < requiredThread then
-            local remaining = thread:getRemainingUses()
+            local remaining = thread:getCurrentUses()
             if remaining > 0 then
                 totalThreads = totalThreads + remaining
                 table.insert(usingThreads, thread)
@@ -856,7 +856,7 @@ function RealisticClothes.getRequiredThreadToRecondition(item, player)
     local totalThread = 0
     for i = 0, threads:size() - 1 do
         local thread = threads:get(i)
-        local remaining = thread:getRemainingUses()
+        local remaining = thread:getCurrentUses()
         if remaining > 0 then
             if totalThread < requiredThread then
                 table.insert(usingThreads, thread)

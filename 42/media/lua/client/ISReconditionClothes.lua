@@ -59,8 +59,8 @@ function ISReconditionClothes:perform()
     end
 
     for _, thread in ipairs(self.threads) do
-        while threadUses > 0 and thread:getRemainingUses() > 0 do
-            thread:Use()
+        while threadUses > 0 and thread:getCurrentUses() > 0 do
+            thread:UseAndSync()
             threadUses = threadUses - 1
         end
     end
