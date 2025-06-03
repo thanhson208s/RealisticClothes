@@ -541,7 +541,7 @@ function RealisticClothes.ripClothes(item, player)
     item:removePatch(part)
     item:setCondition(math.max(item:getCondition() - item:getCondLossPerHole()))
 
-    player:getEmitter():playSound("ClothesRipping")
+    player:getEmitter():playSound("TightClothesRip")
     return true
 end
 

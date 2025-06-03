@@ -31,4 +31,15 @@ module Base {
             volume = 0.25
         }
     }
+
+    sound TightClothesRip
+    {
+        category = Item,
+        loop = false,
+        clip
+        {
+            file = media/sound/tight_clothes_rip.wav,
+            volume = 0.25
+        }
+    }
 }
