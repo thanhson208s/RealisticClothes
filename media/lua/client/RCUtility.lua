@@ -262,9 +262,9 @@ RealisticClothes.CLOTHES_SLOTS = {
     Torso1          = {canRip = true, canDrop = false, insulationMod = true, combatMod=true, incTrip=false, incStiffness=true, difficulty=1},
 
     -- bottom only
-    Skirt           = {canRip = true, canDrop = true, insulationMod = true, combatMod=false, incTrip=true, incStiffness=false, difficulty=1},
-    Pants           = {canRip = true, canDrop = true, insulationMod = true, combatMod=false, incTrip=true, incStiffness=false, difficulty=1},
-    Legs1           = {canRip = true, canDrop = true, insulationMod = true, combatMod=false, incTrip=true, incStiffness=false, difficulty=1},
+    Skirt           = {canRip = true, canDrop = true, insulationMod = true, combatMod=false, incTrip=true, incStiffness=true, difficulty=1},
+    Pants           = {canRip = true, canDrop = true, insulationMod = true, combatMod=false, incTrip=true, incStiffness=true, difficulty=1},
+    Legs1           = {canRip = true, canDrop = true, insulationMod = true, combatMod=false, incTrip=true, incStiffness=true, difficulty=1},
 
     -- top and bottom
     Dress           = {canRip = true, canDrop = false, insulationMod = true, combatMod=true, incTrip=true, incStiffness=true, difficulty=3},

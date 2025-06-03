@@ -260,16 +260,23 @@ RealisticClothes.CLOTHES_SLOTS = {
     JacketHat_Bulky = {canRip = true, canDrop = false, insulationMod = true, combatMod=true, incTrip=false, incStiffness=true, difficulty=3},
     JacketSuit      = {canRip = true, canDrop = false, insulationMod = true, combatMod=true, incTrip=false, incStiffness=true, difficulty=2},
     Torso1          = {canRip = true, canDrop = false, insulationMod = true, combatMod=true, incTrip=false, incStiffness=true, difficulty=1},
+    VestTexture     = {canRip = true, canDrop = false, insulationMod = true, combatMod=true, incTrip=false, incStiffness=true, difficulty=1},
+    Jersey          = {canRip = true, canDrop = false, insulationMod = true, combatMod=true, incTrip=false, incStiffness=true, difficulty=1},
 
     -- bottom only
-    Skirt           = {canRip = true, canDrop = true, insulationMod = true, combatMod=false, incTrip=true, incStiffness=false, difficulty=1},
-    Pants           = {canRip = true, canDrop = true, insulationMod = true, combatMod=false, incTrip=true, incStiffness=false, difficulty=1},
-    Legs1           = {canRip = true, canDrop = true, insulationMod = true, combatMod=false, incTrip=true, incStiffness=false, difficulty=1},
+    Skirt           = {canRip = true, canDrop = true, insulationMod = true, combatMod=false, incTrip=true, incStiffness=true, difficulty=1},
+    Pants           = {canRip = true, canDrop = true, insulationMod = true, combatMod=false, incTrip=true, incStiffness=true, difficulty=1},
+    Legs1           = {canRip = true, canDrop = true, insulationMod = true, combatMod=false, incTrip=true, incStiffness=true, difficulty=1},
+    ShortsShort     = {canRip = true, canDrop = true, insulationMod = true, combatMod=false, incTrip=true, incStiffness=true, difficulty=1},
+    ShortPants      = {canRip = true, canDrop = true, insulationMod = true, combatMod=false, incTrip=true, incStiffness=true, difficulty=1},
+    LongSkirt       = {canRip = true, canDrop = true, insulationMod = true, combatMod=false, incTrip=true, incStiffness=true, difficulty=1},
 
     -- top and bottom
+    LongDress       = {canRip = true, canDrop = false, insulationMod = true, combatMod=true, incTrip=true, incStiffness=true, difficulty=3},
     Dress           = {canRip = true, canDrop = false, insulationMod = true, combatMod=true, incTrip=true, incStiffness=true, difficulty=3},
     Boilersuit      = {canRip = true, canDrop = false, insulationMod = true, combatMod=true, incTrip=true, incStiffness=true, difficulty=3},
     Torso1Legs1     = {canRip = true, canDrop = false, insulationMod = true, combatMod=true, incTrip=true, incStiffness=true, difficulty=2},
+    PantsExtra      = {canRip = true, canDrop = false, insulationMod = true, combatMod=true, incTrip=true, incStiffness=true, difficulty=2},
 }
 
 RealisticClothes.FabricTypeDifficulty = {
@@ -300,12 +307,12 @@ function RealisticClothes.getRequiredLevelToCheck(item)
 end
 
 function RealisticClothes.getCheckDuration(item)
-    if not RealisticClothes.NeedTailoringLevel then return 0 end
-
     return RealisticClothes.CLOTHES_SLOTS[item:getBodyLocation()].difficulty * 100
 end
 
 function RealisticClothes.getRequiredLevelToChange(item, isUpsizing)
+    if not RealisticClothes.NeedTailoringLevel then return 0 end
+
     local difficulty = RealisticClothes.CLOTHES_SLOTS[item:getBodyLocation()].difficulty
     difficulty = difficulty + (RealisticClothes.FabricTypeDifficulty[item:getScriptItem():getFabricType()] or 0)
     if isUpsizing then difficulty = difficulty + 1 end
@@ -789,10 +796,10 @@ end
 
 RealisticClothes.DegradeLocations = {
     Hands = 1, Scarf = 1, Socks = 1, TankTop = 1, Tshirt = 1,
-    Torso1 = 2, Legs1 = 2, Shirt = 2, ShortSleeveShirt = 2, TorsoExtra = 2, Pants = 2, Skirt = 2,
-    Sweater = 3, SweaterHat = 3, Jacket = 3, Jacket_Down = 3, JacketHat = 3, Torso1Legs1 = 3, BathRobe = 3,
-    Jacket_Bulky = 4, JacketHat_Bulky = 4, JacketSuit = 4, Dress = 4,
-    FullSuit = 5, Boilersuit = 5, TorsoExtraVest = 5
+    Torso1 = 2, Legs1 = 2, Shirt = 2, ShortSleeveShirt = 2, TorsoExtra = 2, Pants = 2, Skirt = 2, ShortsShort = 2, ShortPants = 2, LongSkirt = 2, VestTexture = 2, Jersey = 2,
+    Sweater = 3, SweaterHat = 3, Jacket = 3, Jacket_Down = 3, JacketHat = 3, Torso1Legs1 = 3, BathRobe = 3, PantsExtra = 3, TorsoExtraVest = 3,
+    Jacket_Bulky = 4, JacketHat_Bulky = 4, JacketSuit = 4, Dress = 4, LongDress = 4,
+    FullSuit = 5, Boilersuit = 5, TorsoExtraVestBullet = 5
 }
 
 function RealisticClothes.canReconditionClothes(item)
