@@ -15,7 +15,7 @@ function ISUpsizeClothes:new(character, item, needle, scissors, threads, strips)
 
     o.stopOnWalk = false
     o.stopOnRun = true
-    o.maxTime = RealisticClothes.getChangeDuration(item, true)
+    o.maxTime = character:isTimedActionInstant() and 1 or RealisticClothes.getChangeDuration(item, true)
     return o
 end
 

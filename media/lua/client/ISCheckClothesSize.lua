@@ -2,7 +2,7 @@ require "TimedActions/ISBaseTimedAction"
 
 ISCheckClothesSize = ISBaseTimedAction:derive("ISCheckClothesSize")
 
-function ISCheckClothesSize:new(character, item, time)
+function ISCheckClothesSize:new(character, item)
     local o = {}
     setmetatable(o, self)
     self.__index = self
@@ -11,7 +11,7 @@ function ISCheckClothesSize:new(character, item, time)
 
     o.stopOnWalk = false
     o.stopOnRun = true
-    o.maxTime = time
+    o.maxTime = character:isTimedActionInstant() and 1 or RealisticClothes.getCheckDuration(item)
     return o
 end
 

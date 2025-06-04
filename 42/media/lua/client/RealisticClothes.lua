@@ -1,6 +1,7 @@
 RealisticClothes = RealisticClothes or {}
 RealisticClothes.NeedTailoringLevel = true
 RealisticClothes.TailoringXpMultiplier = 1.0
+RealisticClothes.ActionTimeMultiplier = 1.0
 RealisticClothes.RipChanceMultiplier = 1.0
 RealisticClothes.DropChanceMultiplier = 1.0
 RealisticClothes.InsulationReduceMultiplier = 1.0
@@ -18,6 +19,7 @@ RealisticClothes.Debug = false
 function RealisticClothes.onInitMod()
     RealisticClothes.NeedTailoringLevel = SandboxVars.RealisticClothes.NeedTailoringLevel
     RealisticClothes.TailoringXpMultiplier = SandboxVars.RealisticClothes.TailoringXpMultiplier or 1.0
+    RealisticClothes.ActionTimeMultiplier = SandboxVars.RealisticClothes.ActionTimeMultiplier or 1.0
     RealisticClothes.RipChanceMultiplier = SandboxVars.RealisticClothes.RipChanceMultiplier or 1.0
     RealisticClothes.DropChanceMultiplier = SandboxVars.RealisticClothes.DropChanceMultiplier or 1.0
     RealisticClothes.InsulationReduceMultiplier = SandboxVars.RealisticClothes.InsulationReduceMultiplier or 1.0

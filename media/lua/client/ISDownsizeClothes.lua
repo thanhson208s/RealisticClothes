@@ -15,7 +15,7 @@ function ISDownsizeClothes:new(character, item, needle, scissors, threads, paper
 
     o.stopOnWalk = false
     o.stopOnRun = true
-    o.maxTime = RealisticClothes.getChangeDuration(item, false)
+    o.maxTime = character:isTimedActionInstant() and 1 or RealisticClothes.getChangeDuration(item, false)
     return o
 end
 

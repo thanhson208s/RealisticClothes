@@ -15,7 +15,7 @@ function ISReconditionClothes:new(character, item, needle, threads, strips, thre
 
     o.stopOnWalk = false
     o.stopOnRun = true
-    o.maxTime = RealisticClothes.getReconditionDuration(item)
+    o.maxTime = character:isTimedActionInstant() and 1 or RealisticClothes.getReconditionDuration(item)
     return o
 end
 

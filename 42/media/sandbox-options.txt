@@ -12,6 +12,12 @@ option RealisticClothes.TailoringXpMultiplier
     page = RealisticClothes, translation = RealisticClothes_TailoringXpMultiplier,
 }
 
+option RealisticClothes.ActionTimeMultiplier
+{
+    type = double, min = 0.0, max = 100.0, default = 1.0,
+    page = RealisticClothes, translation = RealisticClothes_ActionTimeMultiplier,
+}
+
 option RealisticClothes.RipChanceMultiplier
 {
     type = double, min = 0.0, max = 100.0, default = 1.0,

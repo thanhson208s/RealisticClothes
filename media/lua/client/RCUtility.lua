@@ -300,7 +300,7 @@ function RealisticClothes.getRequiredLevelToCheck(item)
 end
 
 function RealisticClothes.getCheckDuration(item)
-    return RealisticClothes.CLOTHES_SLOTS[item:getBodyLocation()].difficulty * 100
+    return math.max(1, RealisticClothes.CLOTHES_SLOTS[item:getBodyLocation()].difficulty * 50 * RealisticClothes.ActionTimeMultiplier)
 end
 
 function RealisticClothes.getRequiredLevelToChange(item, isUpsizing)
@@ -314,11 +314,11 @@ function RealisticClothes.getRequiredLevelToChange(item, isUpsizing)
 end
 
 function RealisticClothes.getChangeDuration(item, isUpsizing)
-    local duration = RealisticClothes.CLOTHES_SLOTS[item:getBodyLocation()].difficulty * 200
-    duration = duration + (RealisticClothes.FabricTypeDifficulty[item:getScriptItem():getFabricType()] or 0) * 100
-    if isUpsizing then duration = duration + 400 end
+    local duration = RealisticClothes.CLOTHES_SLOTS[item:getBodyLocation()].difficulty * 150
+    duration = duration + (RealisticClothes.FabricTypeDifficulty[item:getScriptItem():getFabricType()] or 0) * 75
+    if isUpsizing then duration = duration + 300 end
 
-    return duration
+    return math.max(1, duration * RealisticClothes.ActionTimeMultiplier)
 end
 
 function RealisticClothes.getSuccessChanceForChange(tailoring, requiredLevel)
@@ -575,7 +575,7 @@ function RealisticClothes.checkClothesSize(player, items)
         if container and container ~= inv then
             ISTimedActionQueue.add(ISInventoryTransferAction:new(player, item, container, inv))
         end
-        ISTimedActionQueue.add(ISCheckClothesSize:new(player, item, RealisticClothes.getCheckDuration(item)))
+        ISTimedActionQueue.add(ISCheckClothesSize:new(player, item))
     end
 end
 
