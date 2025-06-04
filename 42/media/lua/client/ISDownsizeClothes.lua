@@ -20,7 +20,7 @@ function ISDownsizeClothes:new(character, item, needle, scissors, threads, paper
 end
 
 function ISDownsizeClothes:start()
-    self.item:setJobType(getText("IGUI_JobType_Downsize"))
+    self.item:setJobType(getText("IGUI_JobType_DownsizeClothes"))
     self.item:setJobDelta(0.0)
 
     self:setActionAnim(CharacterActionAnims.Craft)

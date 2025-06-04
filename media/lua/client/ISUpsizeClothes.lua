@@ -20,7 +20,7 @@ function ISUpsizeClothes:new(character, item, needle, scissors, threads, strips)
 end
 
 function ISUpsizeClothes:start()
-    self.item:setJobType(getText("IGUI_JobType_Upsize"))
+    self.item:setJobType(getText("IGUI_JobType_UpsizeClothes"))
     self.item:setJobDelta(0.0)
 
     self:setActionAnim(CharacterActionAnims.Craft)

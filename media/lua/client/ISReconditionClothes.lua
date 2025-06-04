@@ -20,7 +20,7 @@ function ISReconditionClothes:new(character, item, needle, threads, strips, thre
 end
 
 function ISReconditionClothes:start()
-    self.item:setJobType(getText("IGUI_JobType_Recondition"))
+    self.item:setJobType(getText("IGUI_JobType_ReconditionClothes"))
     self.item:setJobDelta(0.0)
 end
 

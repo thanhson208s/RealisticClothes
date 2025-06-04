@@ -16,7 +16,7 @@ function ISCheckClothesSize:new(character, item)
 end
 
 function ISCheckClothesSize:start()
-    self.item:setJobType(getText("IGUI_JobType_CheckSize"))
+    self.item:setJobType(getText("IGUI_JobType_CheckClothesSize"))
     self.item:setJobDelta(0.0)
 
     self:setActionAnim("Loot")

@@ -699,7 +699,7 @@ function RealisticClothes.addCheckSizeOption(items, player, context)
     end
 
     if #listClothes > 0 then
-        context:addOption(getText("IGUI_JobType_CheckSize"), player, RealisticClothes.checkClothesSize, listClothes)
+        context:addOption(getText("IGUI_JobType_CheckClothesSize"), player, RealisticClothes.checkClothesSize, listClothes)
     end
 end
 
@@ -725,7 +725,7 @@ function RealisticClothes.addChangeSizeOption(item, player, context)
                 local needle = player:getInventory():getFirstEvalRecurse(RealisticClothes.predicateNeedle)
                 local scissors = player:getInventory():getFirstEvalRecurse(RealisticClothes.predicateScissors)
 
-                local option = context:addOption(getText("IGUI_JobType_ChangeSize"))
+                local option = context:addOption(getText("IGUI_JobType_ResizeClothes"))
                 local subMenu = context:getNew(context)
                 context:addSubMenu(option, subMenu)
                 if nextSize then
@@ -938,7 +938,7 @@ function RealisticClothes.addReconditionOption(item, player, context)
     local requiredThread, remainingThread, threads = RealisticClothes.getRequiredThreadToRecondition(item, player)
     local requiredStrip, remainingStrip, strips, stripType = RealisticClothes.getRequiredStripToRecondition(item, player)
 
-    local option = context:addOption(getText("IGUI_JobType_Recondition"), player, RealisticClothes.reconditionClothes, item, needle, threads, strips, requiredThread)
+    local option = context:addOption(getText("IGUI_JobType_ReconditionClothes"), player, RealisticClothes.reconditionClothes, item, needle, threads, strips, requiredThread)
     option.notAvailable = not (needle and threads and strips)
     option.toolTip = ISInventoryPaneContextMenu.addToolTip()
     option.toolTip.description = " " .. RealisticClothes.getColorForPercent(potentialRepair) .. " " .. getText("Tooltip_potentialRepair") .. " " .. math.ceil(potentialRepair * 100) .. "%"
