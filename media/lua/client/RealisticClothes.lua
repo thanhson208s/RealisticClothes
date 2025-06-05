@@ -265,7 +265,7 @@ do -- Add extra stiffness for every fitness rep when wearing tight clothes
             elseif region == 'chest' then
                 table.insert(bodyPartTypes, BodyPartType.Torso_Upper)
             elseif region == 'abs' then
-                table.insert(bodyPartType, BodyPartType.Torso_Lower)
+                table.insert(bodyPartTypes, BodyPartType.Torso_Lower)
             end
         end
 
