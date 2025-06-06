@@ -22,7 +22,7 @@ RealisticClothes.DegradingFactorModifier = 1.0
 RealisticClothes.ChanceToDegradeOnFailure = 0.5
 RealisticClothes.MinDaysToDegrade = 30
 RealisticClothes.MaxDaysToDegrade = 360
-RealisticClothes.Debug = true
+RealisticClothes.Debug = false
 
 -- Init all modifiers
 function RealisticClothes.onInitMod()

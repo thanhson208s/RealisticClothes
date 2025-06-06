@@ -13,6 +13,8 @@ RealisticClothes.OnlyDegradeRepairableClothes = false
 RealisticClothes.BaseDegradingChance = 0.0
 RealisticClothes.DegradingFactorModifier = 1.0
 RealisticClothes.ChanceToDegradeOnFailure = 0.5
+RealisticClothes.MinDaysToDegrade = 30
+RealisticClothes.MaxDaysToDegrade = 360
 RealisticClothes.Debug = false
 
 -- Init all modifiers
@@ -36,6 +38,8 @@ function RealisticClothes.onInitMod()
         minDaysToDegrade = 30
         maxDaysToDegrade = 360
     end
+    RealisticClothes.MinDaysToDegrade = minDaysToDegrade
+    RealisticClothes.MaxDaysToDegrade = maxDaysToDegrade
 
     local maxChance = 10 / (minDaysToDegrade * 24)
     local minChance = 10 / (maxDaysToDegrade * 24)
@@ -508,27 +512,47 @@ end
 do -- Modify clothes tooltip to include size
     local ISToolTipInv_render = ISToolTipInv.render
     function ISToolTipInv:render()
-        if not self.item or not instanceof(self.item, "Clothing") or not RealisticClothes.canClothesHaveSize(self.item) then
+        if not self.item or not instanceof(self.item, "Clothing") or not (RealisticClothes.canClothesHaveSize(self.item) or RealisticClothes.canClothesDegrade(self.item)) then
             return ISToolTipInv_render(self)
         end
-                
-        local sizeStr = '???'
         
-        if RealisticClothes.hasModData(self.item) then
-            local data = RealisticClothes.getOrCreateModData(self.item)
-            local clothesSize = RealisticClothes.getClothesSizeFromName(data.size)
-            local playerSize = RealisticClothes.getPlayerSize(getPlayer())
-            local diff = RealisticClothes.getSizeDiff(clothesSize, playerSize)
+        local player = getPlayer()
+        if not player or not player:isLocalPlayer() then
+            return ISToolTipInv_render(self)
+        end
 
-            if data.reveal then
-                sizeStr = clothesSize.name .. (data.resized ~= 0 and '*' or '') .. ' ' .. RealisticClothes.getHintText(diff)
-            elseif data.hint then
-                sizeStr = RealisticClothes.getHintText(diff)
-            end
+        local str = ""
+        if RealisticClothes.canClothesHaveSize(self.item) then
+            str = "???"
+            if RealisticClothes.hasModData(self.item) then
+                local data = RealisticClothes.getOrCreateModData(self.item)
+                local clothesSize = RealisticClothes.getClothesSizeFromName(data.size)
+                local playerSize = RealisticClothes.getPlayerSize(player)
+                local diff = RealisticClothes.getSizeDiff(clothesSize, playerSize)
 
-            if RealisticClothes.Debug then
-                sizeStr = sizeStr .. ' [' .. tostring(data.size) .. '-' .. tostring(data.reveal) .. '-' .. tostring(data.hint) .. '-' .. tostring(data.resized) .. ']'
+                if data.reveal then
+                    str = clothesSize.name .. (data.resized ~= 0 and '*' or '') .. ' ' .. RealisticClothes.getHintText(diff)
+                elseif data.hint then
+                    str = RealisticClothes.getHintText(diff)
+                end
+
+                if RealisticClothes.Debug then
+                    str = str .. ' [' .. tostring(data.size) .. '-' .. tostring(data.reveal) .. '-' .. tostring(data.hint) .. '-' .. tostring(data.resized) .. ']'
+                end
             end
+        end
+
+        -- if RealisticClothes.canClothesDegrade(self.item) and RealisticClothes.MinDaysToDegrade < RealisticClothes.MaxDaysToDegrade then
+        --     if str ~= "" then
+        --         str = str .. ' - '
+        --     end
+
+        --     local daysToDegrade = 1 / RealisticClothes.calcDegradeChance(self.item, player) / 24
+        --     str = str .. '(~' .. tostring(daysToDegrade * self.item:getCondition()) .. ')'
+        -- end
+
+        if str == "" then
+            return ISToolTipInv_render(self)
         end
 
         local injectionStage = 1
@@ -550,7 +574,7 @@ do -- Modify clothes tooltip to include size
                 injectionStage = 3
                 self.tooltip:DrawText(
                     UIFont[getCore():getOptionTooltipFont()],
-                    sizeStr, 5, originalHeight - 5,
+                    str, 5, originalHeight - 5,
                     1, 1, 1, 1
                 )
             end
