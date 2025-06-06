@@ -253,7 +253,7 @@ do -- Add extra stiffness for every fitness rep when wearing tight clothes
             elseif region == 'chest' then
                 table.insert(bodyPartTypes, BodyPartType.Torso_Upper)
             elseif region == 'abs' then
-                table.insert(bodyPartType, BodyPartType.Torso_Lower)
+                table.insert(bodyPartTypes, BodyPartType.Torso_Lower)
             end
         end
 
@@ -269,9 +269,9 @@ end
 
 do -- Adjust the time it takes to wear clothing based on size difference
     local ISWearClothing_new = ISWearClothing.new
-    function ISWearClothing:new(character, item, time, ...)
-        if not RealisticClothes.canClothesHaveSize(item) then 
-            return ISWearClothing_new(self, character, item, time, ...)
+    function ISWearClothing:new(character, item, ...)
+        if not RealisticClothes.canClothesHaveSize(item) or character:isTimedActionInstant() then
+            return ISWearClothing_new(self, character, item, ...)
         end
 
         local data = RealisticClothes.getOrCreateModData(item)
@@ -286,7 +286,9 @@ do -- Adjust the time it takes to wear clothing based on size difference
             timeMultiplier = 1 - 0.1 * diff
         end
 
-        return ISWearClothing_new(self, character, item, time * timeMultiplier, ...)
+        local o = ISWearClothing_new(self, character, item, ...)
+        o.maxTime = o.maxTime * timeMultiplier
+        return o
     end
 end
 
