@@ -23,7 +23,7 @@ function RealisticClothes.onInitMod()
     RealisticClothes.RipChanceMultiplier = SandboxVars.RealisticClothes.RipChanceMultiplier or 1.0
     RealisticClothes.DropChanceMultiplier = SandboxVars.RealisticClothes.DropChanceMultiplier or 1.0
     RealisticClothes.InsulationReduceMultiplier = SandboxVars.RealisticClothes.InsulationReduceMultiplier or 1.0
-    RealisticClothes.CombatSpeedReduceMutiplier = SandboxVars.RealisticClothes.CombatSpeedReduceMultiplier or 1.0
+    RealisticClothes.CombatSpeedReduceMultiplier = SandboxVars.RealisticClothes.CombatSpeedReduceMultiplier or 1.0
     RealisticClothes.IncreaseTripChanceMultiplier = SandboxVars.RealisticClothes.IncreaseTripChanceMultiplier or 1.0
     RealisticClothes.IncreaseStiffnessMultiplier = SandboxVars.RealisticClothes.IncreaseStiffnessMultiplier or 1.0
     RealisticClothes.EnableClothesDegrading = SandboxVars.RealisticClothes.EnableClothesDegrading
@@ -213,24 +213,12 @@ function RealisticClothes.checkClothesCondition()
 
     local player = getPlayer()
     if not player or not player:isLocalPlayer() then return end
-    local playerSize = RealisticClothes.getPlayerSize(player)
-    local maintenance = player:getPerkLevel(Perks.Maintenance)  -- 0-10
-    local tailoring = player:getPerkLevel(Perks.Tailoring)      -- 0-10
-    local skillFactor = 1 - math.sqrt((maintenance * 2 + tailoring) / 3) / 2    -- 0.5 - 1
 
     local items = player:getWornItems()
     for i = 0, items:size() - 1 do
         local item = items:getItemByIndex(i)
         if item and instanceof(item, "Clothing") and RealisticClothes.canClothesDegrade(item) then
-            local diff = 0
-            if RealisticClothes.canClothesHaveSize(item) then
-                local data = RealisticClothes.getOrCreateModData(item)
-                local clothesSize = RealisticClothes.getClothesSizeFromName(data.size)
-                diff = math.max(-2, math.min(0, RealisticClothes.getSizeDiff(clothesSize, playerSize)))
-            end
-            local diffFactor = 0.5 + 2 / (4 + diff)     -- 1 - 1.5
-
-            local chance = RealisticClothes.calcDegradeChance(item, skillFactor, diffFactor)
+            local chance = RealisticClothes.calcDegradeChance(item, player)
             if ZombRandFloat(0, 1) < chance then
                 item:setCondition(item:getCondition() - 1)
                 HaloTextHelper.addTextWithArrow(player, item:getScriptItem():getDisplayName(), false, HaloTextHelper.getColorRed())

@@ -1,3 +1,10 @@
+-- TODO:
+-- Use an identical item to resize or recondition another
+-- Separate modifier for each degrading factor
+-- Running/Sprinting in tight clothes increase stiffness
+-- Sandbox option to include/exclude optional clothing type
+-- Degrading speed
+
 RealisticClothes = RealisticClothes or {}
 RealisticClothes.NeedTailoringLevel = true
 RealisticClothes.TailoringXpMultiplier = 1.0
@@ -13,7 +20,9 @@ RealisticClothes.OnlyDegradeRepairableClothes = false
 RealisticClothes.BaseDegradingChance = 0.0
 RealisticClothes.DegradingFactorModifier = 1.0
 RealisticClothes.ChanceToDegradeOnFailure = 0.5
-RealisticClothes.Debug = false
+RealisticClothes.MinDaysToDegrade = 30
+RealisticClothes.MaxDaysToDegrade = 360
+RealisticClothes.Debug = true
 
 -- Init all modifiers
 function RealisticClothes.onInitMod()
@@ -23,7 +32,7 @@ function RealisticClothes.onInitMod()
     RealisticClothes.RipChanceMultiplier = SandboxVars.RealisticClothes.RipChanceMultiplier or 1.0
     RealisticClothes.DropChanceMultiplier = SandboxVars.RealisticClothes.DropChanceMultiplier or 1.0
     RealisticClothes.InsulationReduceMultiplier = SandboxVars.RealisticClothes.InsulationReduceMultiplier or 1.0
-    RealisticClothes.CombatSpeedReduceMutiplier = SandboxVars.RealisticClothes.CombatSpeedReduceMultiplier or 1.0
+    RealisticClothes.CombatSpeedReduceMultiplier = SandboxVars.RealisticClothes.CombatSpeedReduceMultiplier or 1.0
     RealisticClothes.IncreaseTripChanceMultiplier = SandboxVars.RealisticClothes.IncreaseTripChanceMultiplier or 1.0
     RealisticClothes.IncreaseStiffnessMultiplier = SandboxVars.RealisticClothes.IncreaseStiffnessMultiplier or 1.0
     RealisticClothes.EnableClothesDegrading = SandboxVars.RealisticClothes.EnableClothesDegrading
@@ -36,6 +45,8 @@ function RealisticClothes.onInitMod()
         minDaysToDegrade = 30
         maxDaysToDegrade = 360
     end
+    RealisticClothes.MinDaysToDegrade = minDaysToDegrade
+    RealisticClothes.MaxDaysToDegrade = maxDaysToDegrade
 
     local maxChance = 10 / (minDaysToDegrade * 24)
     local minChance = 10 / (maxDaysToDegrade * 24)
@@ -213,24 +224,12 @@ function RealisticClothes.checkClothesCondition()
 
     local player = getPlayer()
     if not player or not player:isLocalPlayer() then return end
-    local playerSize = RealisticClothes.getPlayerSize(player)
-    local maintenance = player:getPerkLevel(Perks.Maintenance)  -- 0-10
-    local tailoring = player:getPerkLevel(Perks.Tailoring)      -- 0-10
-    local skillFactor = 1 - math.sqrt((maintenance * 2 + tailoring) / 3) / 2    -- 0.5 - 1
 
     local items = player:getWornItems()
     for i = 0, items:size() - 1 do
         local item = items:getItemByIndex(i)
         if item and instanceof(item, "Clothing") and RealisticClothes.canClothesDegrade(item) then
-            local diff = 0
-            if RealisticClothes.canClothesHaveSize(item) then
-                local data = RealisticClothes.getOrCreateModData(item)
-                local clothesSize = RealisticClothes.getClothesSizeFromName(data.size)
-                diff = math.max(-2, math.min(0, RealisticClothes.getSizeDiff(clothesSize, playerSize)))
-            end
-            local diffFactor = 0.5 + 2 / (4 + diff)     -- 1 - 1.5
-
-            local chance = RealisticClothes.calcDegradeChance(item, skillFactor, diffFactor)
+            local chance = RealisticClothes.calcDegradeChance(item, player)
             if ZombRandFloat(0, 1) < chance then
                 item:setCondition(item:getCondition() - 1)
                 HaloTextHelper.addTextWithArrow(player, item:getScriptItem():getDisplayName(), false, HaloTextHelper.getColorRed())
@@ -518,27 +517,47 @@ end
 do -- Modify clothes tooltip to include size
     local ISToolTipInv_render = ISToolTipInv.render
     function ISToolTipInv:render()
-        if not self.item or not instanceof(self.item, "Clothing") or not RealisticClothes.canClothesHaveSize(self.item) then
+        if not self.item or not instanceof(self.item, "Clothing") or not (RealisticClothes.canClothesHaveSize(self.item) or RealisticClothes.canClothesDegrade(self.item)) then
             return ISToolTipInv_render(self)
         end
-                
-        local sizeStr = '???'
         
-        if RealisticClothes.hasModData(self.item) then
-            local data = RealisticClothes.getOrCreateModData(self.item)
-            local clothesSize = RealisticClothes.getClothesSizeFromName(data.size)
-            local playerSize = RealisticClothes.getPlayerSize(getPlayer())
-            local diff = RealisticClothes.getSizeDiff(clothesSize, playerSize)
+        local player = getPlayer()
+        if not player or not player:isLocalPlayer() then
+            return ISToolTipInv_render(self)
+        end
 
-            if data.reveal then
-                sizeStr = clothesSize.name .. (data.resized ~= 0 and '*' or '') .. ' ' .. RealisticClothes.getHintText(diff)
-            elseif data.hint then
-                sizeStr = RealisticClothes.getHintText(diff)
-            end
+        local str = ""
+        if RealisticClothes.canClothesHaveSize(self.item) then
+            str = "???"
+            if RealisticClothes.hasModData(self.item) then
+                local data = RealisticClothes.getOrCreateModData(self.item)
+                local clothesSize = RealisticClothes.getClothesSizeFromName(data.size)
+                local playerSize = RealisticClothes.getPlayerSize(player)
+                local diff = RealisticClothes.getSizeDiff(clothesSize, playerSize)
 
-            if RealisticClothes.Debug then
-                sizeStr = sizeStr .. ' [' .. tostring(data.size) .. '-' .. tostring(data.reveal) .. '-' .. tostring(data.hint) .. '-' .. tostring(data.resized) .. ']'
+                if data.reveal then
+                    str = clothesSize.name .. (data.resized ~= 0 and '*' or '') .. ' ' .. RealisticClothes.getHintText(diff)
+                elseif data.hint then
+                    str = RealisticClothes.getHintText(diff)
+                end
+
+                if RealisticClothes.Debug then
+                    str = str .. ' [' .. tostring(data.size) .. '-' .. tostring(data.reveal) .. '-' .. tostring(data.hint) .. '-' .. tostring(data.resized) .. ']'
+                end
             end
+        end
+
+        -- if RealisticClothes.canClothesDegrade(self.item) and RealisticClothes.MinDaysToDegrade < RealisticClothes.MaxDaysToDegrade then
+        --     if str ~= "" then
+        --         str = str .. ' - '
+        --     end
+
+        --     local daysToDegrade = 1 / RealisticClothes.calcDegradeChance(self.item, player) / 24
+        --     str = str .. '(~' .. tostring(daysToDegrade * self.item:getCondition()) .. ')'
+        -- end
+
+        if str == "" then
+            return ISToolTipInv_render(self)
         end
 
         local injectionStage = 1
@@ -560,7 +579,7 @@ do -- Modify clothes tooltip to include size
                 injectionStage = 3
                 self.tooltip:DrawText(
                     UIFont[getCore():getOptionTooltipFont()],
-                    sizeStr, 5, originalHeight - 5,
+                    str, 5, originalHeight - 5,
                     1, 1, 1, 1
                 )
             end

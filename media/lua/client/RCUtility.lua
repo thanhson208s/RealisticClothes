@@ -1,5 +1,3 @@
--- TODO: Use an identical item to resize or recondition another
-
 RealisticClothes = RealisticClothes or {}
 
 function RealisticClothes.debugLog(str)
@@ -816,7 +814,20 @@ function RealisticClothes.canClothesDegrade(item)
     return true
 end
 
-function RealisticClothes.calcDegradeChance(item, skillFactor, diffFactor)
+function RealisticClothes.calcDegradeChance(item, player)
+    local playerSize = RealisticClothes.getPlayerSize(player)
+    local maintenance = player:getPerkLevel(Perks.Maintenance)  -- 0-10
+    local tailoring = player:getPerkLevel(Perks.Tailoring)      -- 0-10
+    local skillFactor = 1 - math.sqrt((maintenance * 2 + tailoring) / 30) / 2    -- 0.5 - 1
+    
+    local diff = 0
+    if RealisticClothes.canClothesHaveSize(item) then
+        local data = RealisticClothes.getOrCreateModData(item)
+        local clothesSize = RealisticClothes.getClothesSizeFromName(data.size)
+        diff = math.max(-2, math.min(0, RealisticClothes.getSizeDiff(clothesSize, playerSize)))
+    end
+    local diffFactor = 0.5 + 2 / (4 + diff)     -- 1 - 1.5
+
     local biteDefense = math.max(0, math.min(100, item:getBiteDefense() or 0.0)) / 100
     local scratchDefense = math.max(0, math.min(100, item:getScratchDefense() or 0.0)) / 100
     local bulletDefense = math.max(0, math.min(100, item:getBulletDefense() or 0.0)) / 100
