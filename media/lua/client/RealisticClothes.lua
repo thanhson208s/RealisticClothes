@@ -398,7 +398,7 @@ end
 do -- Disable condition gain/loss when adding/removing patches
     local ISRepairClothing_perform = ISRepairClothing.perform
     function ISRepairClothing:perform()
-        if not RealisticClothes.EnableClothesDegrading or not RealisticClothes.canClothesDegrade(self.clothing) then
+        if not RealisticClothes.canClothesDegrade(self.clothing) then
             return ISRepairClothing_perform(self)
         end
 
@@ -409,7 +409,7 @@ do -- Disable condition gain/loss when adding/removing patches
 
     local ISRemovePatch_perform = ISRemovePatch.perform
     function ISRemovePatch:perform()
-        if not RealisticClothes.EnableClothesDegrading or not RealisticClothes.canClothesDegrade(self.clothing) then
+        if not RealisticClothes.canClothesDegrade(self.clothing) then
             return ISRemovePatch_perform(self)
         end
 
@@ -526,9 +526,11 @@ do -- Modify clothes tooltip to include size
             return ISToolTipInv_render(self)
         end
 
-        local str = ""
+        local sizeStr = nil
+        local degradeStr = nil
+        local degradeColor = nil
         if RealisticClothes.canClothesHaveSize(self.item) then
-            str = "???"
+            sizeStr = "???"
             if RealisticClothes.hasModData(self.item) then
                 local data = RealisticClothes.getOrCreateModData(self.item)
                 local clothesSize = RealisticClothes.getClothesSizeFromName(data.size)
@@ -536,27 +538,46 @@ do -- Modify clothes tooltip to include size
                 local diff = RealisticClothes.getSizeDiff(clothesSize, playerSize)
 
                 if data.reveal then
-                    str = clothesSize.name .. (data.resized ~= 0 and '*' or '') .. ' ' .. RealisticClothes.getHintText(diff)
+                    sizeStr = clothesSize.name .. (data.resized ~= 0 and '*' or '') .. ' ' .. RealisticClothes.getHintText(diff)
                 elseif data.hint then
-                    str = RealisticClothes.getHintText(diff)
+                    sizeStr = RealisticClothes.getHintText(diff)
                 end
 
                 if RealisticClothes.Debug then
-                    str = str .. ' [' .. tostring(data.size) .. '-' .. tostring(data.reveal) .. '-' .. tostring(data.hint) .. '-' .. tostring(data.resized) .. ']'
+                    sizeStr = sizeStr .. ' [' .. tostring(data.size) .. '-' .. tostring(data.reveal) .. '-' .. tostring(data.hint) .. '-' .. tostring(data.resized) .. ']'
                 end
             end
         end
 
-        -- if RealisticClothes.canClothesDegrade(self.item) and RealisticClothes.MinDaysToDegrade < RealisticClothes.MaxDaysToDegrade then
-        --     if str ~= "" then
-        --         str = str .. ' - '
-        --     end
+        if RealisticClothes.canClothesDegrade(self.item) and RealisticClothes.MinDaysToDegrade < RealisticClothes.MaxDaysToDegrade and player:isEquippedClothing(self.item) then
+            local daysToDegrade
+            if not RealisticClothes.DegradingChance[self.item] then
+                daysToDegrade = 1 / RealisticClothes.calcDegradeChance(self.item, player) / 24
+            else
+                daysToDegrade = 1 / RealisticClothes.DegradingChance[self.item] / 24
+            end
+            daysToDegrade = daysToDegrade * self.item:getCondition()
+            local maintainedFactor = (daysToDegrade - RealisticClothes.MinDaysToDegrade) / (RealisticClothes.MaxDaysToDegrade - RealisticClothes.MinDaysToDegrade)
+            degradeStr = getText("IGUI_RealisticClothes_DaysRemaining", math.ceil(daysToDegrade))
+            if player:getPerkLevel(Perks.Tailoring) < RealisticClothes.getRequiredLevelToRecondition(self.item) then
+                if maintainedFactor < 0.2 then
+                    degradeStr = getText("IGUI_RealisticClothes_RapidDegrading")
+                elseif maintainedFactor < 0.4 then
+                    degradeStr = getText("IGUI_RealisticClothes_FastDegrading")
+                elseif maintainedFactor < 0.6 then
+                    degradeStr = getText("IGUI_RealisticClothes_NormallyDegrading")
+                elseif maintainedFactor < 0.8 then
+                    degradeStr = getText("IGUI_RealisticClothes_SlowlyDegrading")
+                else
+                    degradeStr = getText("IGUI_RealisticClothes_BarelyDegrading")
+                end
+            end
 
-        --     local daysToDegrade = 1 / RealisticClothes.calcDegradeChance(self.item, player) / 24
-        --     str = str .. '(~' .. tostring(daysToDegrade * self.item:getCondition()) .. ')'
-        -- end
+            degradeColor = ColorInfo.new(0, 0, 0, 1)
+            getCore():getBadHighlitedColor():interp(getCore():getGoodHighlitedColor(), maintainedFactor, degradeColor)
+        end
 
-        if str == "" then
+        if not sizeStr and not degradeStr then
             return ISToolTipInv_render(self)
         end
 
@@ -568,7 +589,7 @@ do -- Modify clothes tooltip to include size
             if injectionStage == 1 then
                 injectionStage = 2
                 originalHeight = height
-                height = height + 18
+                height = height + 14
             end
             return oldSetHeight(self, height, ...)
         end
@@ -577,11 +598,20 @@ do -- Modify clothes tooltip to include size
         self.drawRectBorder = function(self, ...)
             if injectionStage == 2 then
                 injectionStage = 3
-                self.tooltip:DrawText(
-                    UIFont[getCore():getOptionTooltipFont()],
-                    str, 5, originalHeight - 5,
-                    1, 1, 1, 1
-                )
+                if sizeStr then
+                    self.tooltip:DrawText(
+                        UIFont[getCore():getOptionTooltipFont()],
+                        sizeStr, 5, originalHeight - 5,
+                        1, 1, 1, 1
+                    )
+                end
+                if degradeStr then
+                    self.tooltip:DrawTextRight(
+                        UIFont[getCore():getOptionTooltipFont()],
+                        degradeStr, self:getWidth() - 16, originalHeight - 5,
+                        degradeColor:getR(), degradeColor:getG(), degradeColor:getB(), 1
+                    )
+                end
             end
             return oldDrawRectBorder(self, ...)
         end

@@ -27,6 +27,7 @@ RealisticClothes.SIZE_LIST = {
 RealisticClothes.OriginalInsulation = {}
 RealisticClothes.OriginalCombatSpeedModifier = {}
 RealisticClothes.DiffByBodyPart = {}
+RealisticClothes.DegradingChance = {}
 
 function RealisticClothes.getSizeIndex(name)
     for i, size in ipairs(RealisticClothes.SIZE_LIST) do
@@ -803,6 +804,8 @@ function RealisticClothes.canReconditionClothes(item)
 end
 
 function RealisticClothes.canClothesDegrade(item)
+    if not RealisticClothes.EnableClothesDegrading then return false end
+
     local location = item:getBodyLocation()
     if not RealisticClothes.DegradeLocations[location] then return false end
 
@@ -849,6 +852,7 @@ function RealisticClothes.calcDegradeChance(item, player)
     local chance = RealisticClothes.BaseDegradingChance * totalFactor ^ RealisticClothes.DegradingFactorModifier
     RealisticClothes.debugLog(item:getDisplayName() .. string.format(" factor:%.8f", totalFactor) .. string.format(" chance:%.8f", chance))
 
+    RealisticClothes.DegradingChance[item] = chance
     return chance
 end
 
@@ -973,4 +977,10 @@ function RealisticClothes.reconditionClothes(player, item, needle, threads, stri
     end
 
     ISTimedActionQueue.add(ISReconditionClothes:new(player, item, needle, threads, strips, threadUses))
+end
+
+function RealisticClothes.getRequiredLevelToRecondition(item)
+    if not RealisticClothes.NeedTailoringLevel then return 0 end
+
+    return RealisticClothes.DegradeLocations[item:getBodyLocation()]
 end

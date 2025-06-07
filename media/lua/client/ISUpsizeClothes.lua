@@ -63,7 +63,7 @@ function ISUpsizeClothes:perform()
             -- redraw inventory to separate clothes with different sizes
             self.character:getInventory():setDrawDirty(true)
 
-            if RealisticClothes.EnableClothesDegrading and RealisticClothes.canClothesDegrade(self.item) then
+            if RealisticClothes.canClothesDegrade(self.item) then
                 local requiredLevel = RealisticClothes.getRequiredLevelToChange(self.item, true)
                 local tailoring = self.character:getPerkLevel(Perks.Tailoring)
                 if tailoring > requiredLevel then
@@ -82,7 +82,7 @@ function ISUpsizeClothes:perform()
         end
     else
         self.character:getEmitter():playSound("ResizeFailed");
-        if RealisticClothes.EnableClothesDegrading and RealisticClothes.canClothesDegrade(self.item) then
+        if RealisticClothes.canClothesDegrade(self.item) then
             if ZombRandFloat(0, 1) < 0.5 then
                 self.item:setCondition(self.item:getCondition() - 1)
             end

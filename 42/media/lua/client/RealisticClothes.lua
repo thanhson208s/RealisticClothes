@@ -393,7 +393,7 @@ end
 do -- Disable condition gain/loss when adding/removing patches
     local ISRepairClothing_perform = ISRepairClothing.perform
     function ISRepairClothing:perform()
-        if not RealisticClothes.EnableClothesDegrading or not RealisticClothes.canClothesDegrade(self.clothing) then
+        if not RealisticClothes.canClothesDegrade(self.clothing) then
             return ISRepairClothing_perform(self)
         end
 
@@ -404,7 +404,7 @@ do -- Disable condition gain/loss when adding/removing patches
 
     local ISRemovePatch_perform = ISRemovePatch.perform
     function ISRemovePatch:perform()
-        if not RealisticClothes.EnableClothesDegrading or not RealisticClothes.canClothesDegrade(self.clothing) then
+        if not RealisticClothes.canClothesDegrade(self.clothing) then
             return ISRemovePatch_perform(self)
         end
 
@@ -563,7 +563,7 @@ do -- Modify clothes tooltip to include size
             if injectionStage == 1 then
                 injectionStage = 2
                 originalHeight = height
-                height = height + 18
+                height = height + 14
             end
             return oldSetHeight(self, height, ...)
         end
