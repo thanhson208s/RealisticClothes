@@ -15,6 +15,7 @@ RealisticClothes.DegradingFactorModifier = 1.0
 RealisticClothes.ChanceToDegradeOnFailure = 0.5
 RealisticClothes.MinDaysToDegrade = 30
 RealisticClothes.MaxDaysToDegrade = 360
+RealisticClothes.ListCustomClothes = {}
 RealisticClothes.Debug = false
 
 -- Init all modifiers
@@ -45,6 +46,8 @@ function RealisticClothes.onInitMod()
     local minChance = 10 / (maxDaysToDegrade * 24)
     RealisticClothes.DegradingFactorModifier = math.log(maxChance / minChance) / math.log(2.25 / 0.2)
     RealisticClothes.BaseDegradingChance = math.sqrt(minChance * maxChance / (0.2 * 2.25) ^ RealisticClothes.DegradingFactorModifier)
+
+    RealisticClothes.ListCustomClothes = luautils.split(SandboxVars.RealisticClothes.ListCustomClothes, ',')
 end
 Events.OnInitGlobalModData.Add(RealisticClothes.onInitMod)
 

@@ -358,7 +358,14 @@ end
 
 function RealisticClothes.canClothesHaveSize(item)
     local location = item:getBodyLocation()
-    return RealisticClothes.CLOTHES_SLOTS[location] ~= nil
+    if RealisticClothes.CLOTHES_SLOTS[location] == nil then
+        local itemType = item:getFullType()
+        for _, clothesType in ipairs(RealisticClothes.ListCustomClothes) do
+            if clothesType == itemType then return true end
+        end
+        return false
+    end
+    return true
 end
 
 function RealisticClothes.canResizeClothes(item)

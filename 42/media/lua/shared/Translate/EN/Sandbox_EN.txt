@@ -29,4 +29,6 @@ Sandbox_EN = {
     Sandbox_RealisticClothes_MaxDaysToDegrade_tooltip = "Maximum days for a clothes to completely degrade (at best clothes condition)",
     Sandbox_RealisticClothes_ChanceToDegradeOnFailure = "Chance to degrade on failure",
     Sandbox_RealisticClothes_ChanceToDegradeOnFailure_tooltip = "Chance that clothes reduce condition when resize or recondition fails",
+    Sandbox_RealisticClothes_ListCustomClothes = "List custom clothes",
+    Sandbox_RealisticClothes_ListCustomClothes_tooltip = "Clothes that you think should have sizes but are not in this mod, separated by comma. <LINE> For example: Base.Clothing1,Base.Clothing2,Base.Clothing3",
 }
