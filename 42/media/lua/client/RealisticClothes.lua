@@ -113,11 +113,30 @@ function RealisticClothes.onUpdatePlayer(player)
         for i = 0, allBodyParts:size() - 1 do
             local bodyPart = allBodyParts:get(i)
             if bodyPart:getStiffness() > 0 then
-                local diff = RealisticClothes.getDiffForBodyPart(player, bodyPart:getType())
+                local diff = RealisticClothes.getDiffForBodyPart(bodyPart:getType())
                 if diff < 0 then
                     local extraStiffness = (bodyPart:getStiffness() < 5 * math.abs(diff)) and 0.002 or (math.abs(diff) * 0.0005)
                     bodyPart:setStiffness(bodyPart:getStiffness() + extraStiffness * getGameTime():getMultiplier())
                 end
+            end
+        end
+    end
+
+    if player:isPlayerMoving() then
+        local stiffnessMul = 1.0
+        if player:isRunning() then
+            stiffnessMul = 2.0
+        elseif player:isSprinting() then
+            stiffnessMul = 3.0
+        end
+        local movingStiffness = 0.00075 * stiffnessMul * (math.abs(diff) + 1) / 2 * RealisticClothes.IncreaseStiffnessMultiplier
+        
+        local bodyPartTypes = {BodyPartType.UpperLeg_L, BodyPartType.UpperLeg_R, BodyPartType.LowerLeg_L, BodyPartType.LowerLeg_R}
+        for _, bodyPartType in ipairs(bodyPartTypes) do
+            local bodyPart = player:getBodyDamamge():getBodyPart(bodyPartType)
+            local diff = RealisticClothes.getDiffForBodyPart(bodyPartType)
+            if diff < 0 then
+                local bodyPart:setStiffness(bodyPart:getStiffness() + movingStiffness * getGameTime():getMultiplier())
             end
         end
     end
@@ -266,7 +285,7 @@ do -- Add extra stiffness for every fitness rep when wearing tight clothes
 
         for _, bodyPartType in ipairs(bodyPartTypes) do
             local bodyPart = self.character:getBodyDamage():getBodyPart(bodyPartType)
-            local diff = RealisticClothes.getDiffForBodyPart(self.character, bodyPartType)
+            local diff = RealisticClothes.getDiffForBodyPart(bodyPartType)
             if diff < 0 then
                 bodyPart:setStiffness(bodyPart:getStiffness() + RealisticClothes.getExtraStiffness(diff))
             end

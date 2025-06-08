@@ -227,7 +227,7 @@ function RealisticClothes.getOrCreateModData(item, initSize)
     return data.RealisticClothes
 end
 
-function RealisticClothes.getDiffForBodyPart(player, bodyPartType)
+function RealisticClothes.getDiffForBodyPart(bodyPartType)
     local playerData = RealisticClothes.DiffByBodyPart
 
     return playerData and playerData[bodyPartType] or 0
