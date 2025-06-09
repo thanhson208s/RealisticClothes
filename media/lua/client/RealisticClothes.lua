@@ -129,13 +129,13 @@ function RealisticClothes.onUpdatePlayer(player)
         elseif player:isSprinting() then
             stiffnessMul = 3.0
         end
-        local movingStiffness = 0.00075 * stiffnessMul * (math.abs(diff) + 1) / 2 * RealisticClothes.IncreaseStiffnessMultiplier
 
         local bodyPartTypes = {BodyPartType.UpperLeg_L, BodyPartType.UpperLeg_R, BodyPartType.LowerLeg_L, BodyPartType.LowerLeg_R}
         for _, bodyPartType in ipairs(bodyPartTypes) do
-            local bodyPart = player:getBodyDamamge():getBodyPart(bodyPartType)
+            local bodyPart = player:getBodyDamage():getBodyPart(bodyPartType)
             local diff = RealisticClothes.getDiffForBodyPart(bodyPartType)
             if diff < 0 then
+                local movingStiffness = 0.00075 * stiffnessMul * (math.abs(diff) + 1) / 2 * RealisticClothes.IncreaseStiffnessMultiplier
                 bodyPart:setStiffness(bodyPart:getStiffness() + movingStiffness * getGameTime():getMultiplier())
             end
         end
