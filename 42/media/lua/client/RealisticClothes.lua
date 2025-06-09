@@ -130,13 +130,13 @@ function RealisticClothes.onUpdatePlayer(player)
             stiffnessMul = 3.0
         end
         local movingStiffness = 0.00075 * stiffnessMul * (math.abs(diff) + 1) / 2 * RealisticClothes.IncreaseStiffnessMultiplier
-        
+
         local bodyPartTypes = {BodyPartType.UpperLeg_L, BodyPartType.UpperLeg_R, BodyPartType.LowerLeg_L, BodyPartType.LowerLeg_R}
         for _, bodyPartType in ipairs(bodyPartTypes) do
             local bodyPart = player:getBodyDamamge():getBodyPart(bodyPartType)
             local diff = RealisticClothes.getDiffForBodyPart(bodyPartType)
             if diff < 0 then
-                local bodyPart:setStiffness(bodyPart:getStiffness() + movingStiffness * getGameTime():getMultiplier())
+                bodyPart:setStiffness(bodyPart:getStiffness() + movingStiffness * getGameTime():getMultiplier())
             end
         end
     end
@@ -606,7 +606,7 @@ do -- Modify clothes tooltip to include size
             if injectionStage == 1 then
                 injectionStage = 2
                 originalHeight = height
-                height = height + 14
+                height = height + 16
             end
             return oldSetHeight(self, height, ...)
         end
@@ -618,14 +618,14 @@ do -- Modify clothes tooltip to include size
                 if sizeStr then
                     self.tooltip:DrawText(
                         UIFont[getCore():getOptionTooltipFont()],
-                        sizeStr, 5, originalHeight - 5,
+                        sizeStr, 7, originalHeight - 4,
                         1, 1, 1, 1
                     )
                 end
                 if degradeStr then
                     self.tooltip:DrawTextRight(
                         UIFont[getCore():getOptionTooltipFont()],
-                        degradeStr, self:getWidth() - 16, originalHeight - 5,
+                        degradeStr, self:getWidth() - 6, originalHeight - 4,
                         degradeColor:getR(), degradeColor:getG(), degradeColor:getB(), 1
                     )
                 end

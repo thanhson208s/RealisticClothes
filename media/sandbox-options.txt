@@ -86,6 +86,6 @@ option RealisticClothes.ChanceToDegradeOnFailure
 
 option RealisticClothes.ListCustomClothes
 {
-    type = string, default = "",
+    type = string, default = ,
     page = RealisticClothes, translation = RealisticClothes_ListCustomClothes,
 }
