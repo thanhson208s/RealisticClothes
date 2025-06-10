@@ -95,7 +95,7 @@ function ISDownsizeClothes:perform()
     end
 
     for _, thread in ipairs(self.threads) do
-        while threadUses > 0 and thread:getRemainingUses() > 0 do
+        while threadUses > 0 and RealisticClothes.getDrainableUses(thread) > 0 do
             thread:Use()
             threadUses = threadUses - 1
         end

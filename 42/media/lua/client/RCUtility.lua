@@ -445,7 +445,7 @@ end
 function RealisticClothes.getOriginalCombatSpeedModifier(item)
     local fullType = item:getFullType()
     if not RealisticClothes.OriginalCombatSpeedModifier[fullType] then
-        RealisticClothes.OriginalCombatSpeedModifier[fullType] = instanceItem(fullType):getCombatSpeedModifier()
+        RealisticClothes.OriginalCombatSpeedModifier[fullType] = RealisticClothes.createItem(fullType):getCombatSpeedModifier()
     end
 
     return RealisticClothes.OriginalCombatSpeedModifier[fullType]
@@ -623,7 +623,7 @@ end
 function RealisticClothes.getRemainingThread(threads)
     local total = 0
     for i = 0, threads:size() - 1 do
-        total = total + threads:get(i):getCurrentUses()
+        total = total + RealisticClothes.getDrainableUses(threads:get(i))
     end
     return total
 end
@@ -641,7 +641,7 @@ function RealisticClothes.getUsingThreads(threads, requiredThread)
     for i = 0, threads:size() - 1 do
         local thread = threads:get(i)
         if totalThreads < requiredThread then
-            local remaining = thread:getCurrentUses()
+            local remaining = RealisticClothes.getDrainableUses(thread)
             if remaining > 0 then
                 totalThreads = totalThreads + remaining
                 table.insert(usingThreads, thread)
@@ -871,7 +871,7 @@ function RealisticClothes.getRequiredThreadToRecondition(item, player)
     local totalThread = 0
     for i = 0, threads:size() - 1 do
         local thread = threads:get(i)
-        local remaining = thread:getCurrentUses()
+        local remaining = RealisticClothes.getDrainableUses(thread)
         if remaining > 0 then
             if totalThread < requiredThread then
                 table.insert(usingThreads, thread)
@@ -907,7 +907,7 @@ function RealisticClothes.getReconditionDuration(item)
 end
 
 function RealisticClothes.getTailoringXpForRecondition(item, isSuccess)
-    local repairedTimes = item:getHaveBeenRepaired()
+    local repairedTimes = RealisticClothes.getRepairedTimes(item)
     local difficulty = RealisticClothes.DegradeLocations[item:getBodyLocation()]
 
     local xp
@@ -923,7 +923,7 @@ end
 function RealisticClothes.getPotentialRepairForRecondition(item, player)
     local maintenance = player:getPerkLevel(Perks.Maintenance)
     local tailoring = player:getPerkLevel(Perks.Tailoring)
-    local repairedTimes = item:getHaveBeenRepaired()
+    local repairedTimes = RealisticClothes.getRepairedTimes(item)
     local difficulty = RealisticClothes.DegradeLocations[item:getBodyLocation()]
 
     local delta = tailoring - difficulty + 1
@@ -937,7 +937,7 @@ end
 function RealisticClothes.getSuccessChanceForRecondition(item, player)
     local maintenance = player:getPerkLevel(Perks.Maintenance)
     local tailoring = player:getPerkLevel(Perks.Tailoring)
-    local repairedTimes = item:getHaveBeenRepaired()
+    local repairedTimes = RealisticClothes.getRepairedTimes(item)
     local difficulty = RealisticClothes.DegradeLocations[item:getBodyLocation()]
 
     local delta = tailoring - difficulty + 1
@@ -952,14 +952,14 @@ end
 
 function RealisticClothes.getPotentialRepairUsingSpare(item, player, spareItem)
     local potentialRepair = RealisticClothes.getPotentialRepairForRecondition(item, player)
-    potentialRepair = potentialRepair + 0.1 * spareItem:getCondition() * 1 / (1 + 0.5 * (spareItem:getHaveBeenRepaired() - 1))
+    potentialRepair = potentialRepair + 0.1 * spareItem:getCondition() * 1 / (1 + 0.5 * (RealisticClothes.getRepairedTimes(spareItem)))
 
     return math.max(0, math.min(1, potentialRepair))
 end
 
 function RealisticClothes.getSuccessChanceUsingSpare(item, player, spareItem)
     local successChance = RealisticClothes.getSuccessChanceForRecondition(item, player)
-    successChance = successChance + 0.1 * spareItem:getCondition() * 1 / (1 + 0.5 * (spareItem:getHaveBeenRepaired() - 1))
+    successChance = successChance + 0.1 * spareItem:getCondition() * 1 / (1 + 0.5 * (RealisticClothes.getRepairedTimes(spareItem)))
 
     return math.max(0, math.min(1, successChance))
 end
@@ -967,7 +967,7 @@ end
 function RealisticClothes.addReconditionOption(item, player, context)
     if item:getCondition() == item:getConditionMax() then return end
 
-    local repairedTimes = item:getHaveBeenRepaired()
+    local repairedTimes = RealisticClothes.getRepairedTimes(item)
     local potentialRepair = math.max(0, math.min(1, RealisticClothes.getPotentialRepairForRecondition(item, player)))
     local successChance = math.max(0, math.min(1, RealisticClothes.getSuccessChanceForRecondition(item, player)))
 
@@ -1004,7 +1004,7 @@ function RealisticClothes.addReconditionOption(item, player, context)
             local requiredLevel = RealisticClothes.getRequiredLevelToRecondition(item)
             local tailoring = player:getPerkLevel(Perks.Tailoring)
             local spareCond = spareItem:getCondition() / spareItem:getConditionMax()
-            local sparedRepaired = spareItem:getHaveBeenRepaired()
+            local sparedRepaired = RealisticClothes.getRepairedTimes(spareItem)
             local effectiveCond = spareCond * 1 / (1 + 0.5 * sparedRepaired)
             potentialRepair = tailoring >= requiredLevel and RealisticClothes.getPotentialRepairUsingSpare(item, player, spareItem) or 0
             successChance = tailoring >= requiredLevel and RealisticClothes.getSuccessChanceUsingSpare(item, player, spareItem) or 0
