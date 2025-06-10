@@ -32,7 +32,7 @@ function RealisticClothes.onInitMod()
     RealisticClothes.EnableClothesDegrading = SandboxVars.RealisticClothes.EnableClothesDegrading
     RealisticClothes.OnlyDegradeRepairableClothes = SandboxVars.RealisticClothes.OnlyDegradeRepairableClothes
     RealisticClothes.ChanceToDegradeOnFailure = SandboxVars.RealisticClothes.ChanceToDegradeOnFailure or 0.5
-    
+
     local minDaysToDegrade = SandboxVars.RealisticClothes.MinDaysToDegrade or 30
     local maxDaysToDegrade = SandboxVars.RealisticClothes.MaxDaysToDegrade or 360
     if minDaysToDegrade > maxDaysToDegrade then
@@ -340,7 +340,7 @@ do -- Chance to rip too tight clothing when wearing, can not wear very tight clo
                 return
             end
         end
-        
+
         local result = ISWearClothing_perform(self)
         RealisticClothes.updateOneClothes(self.item, self.character)
         return result
@@ -462,7 +462,7 @@ do -- Modify character screen to show clothing size according to weight
         if hasWeightText then
             hasWeightText = false
             local width = getTextManager():MeasureStringX(UIFont.Small, str)
-            
+
             if hasWeightIcon then
                 savedWidth = width
                 savedX = x
@@ -537,7 +537,7 @@ do -- Modify clothes tooltip to include size
         if not self.item or not instanceof(self.item, "Clothing") or not (RealisticClothes.canClothesHaveSize(self.item) or RealisticClothes.canClothesDegrade(self.item)) then
             return ISToolTipInv_render(self)
         end
-        
+
         local player = getPlayer()
         if not player or not player:isLocalPlayer() then
             return ISToolTipInv_render(self)

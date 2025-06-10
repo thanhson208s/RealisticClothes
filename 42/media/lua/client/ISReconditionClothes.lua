@@ -50,7 +50,7 @@ function ISReconditionClothes:perform()
         if ZombRandFloat(0, 1) < RealisticClothes.ChanceToDegradeOnFailure then
             self.item:setCondition(self.item:getCondition() - 1)
         end
-        
+
         self.character:getEmitter():playSound("ResizeFailed")
         self.character:getXp():AddXP(Perks.Tailoring, RealisticClothes.getTailoringXpForRecondition(self.item, false))
 

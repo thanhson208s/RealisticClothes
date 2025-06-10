@@ -829,7 +829,7 @@ function RealisticClothes.calcDegradeChance(item, player)
     local maintenance = player:getPerkLevel(Perks.Maintenance)  -- 0-10
     local tailoring = player:getPerkLevel(Perks.Tailoring)      -- 0-10
     local skillFactor = 1 - math.sqrt((maintenance * 2 + tailoring) / 30) / 2    -- 0.5 - 1
-    
+
     local diff = 0
     if RealisticClothes.canClothesHaveSize(item) then
         local data = RealisticClothes.getOrCreateModData(item)
