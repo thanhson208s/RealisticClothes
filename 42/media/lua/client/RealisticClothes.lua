@@ -9,7 +9,6 @@ RealisticClothes.CombatSpeedReduceMultiplier = 1.0
 RealisticClothes.IncreaseTripChanceMultiplier = 1.0
 RealisticClothes.IncreaseStiffnessMultiplier = 1.0
 RealisticClothes.EnableClothesDegrading = true
-RealisticClothes.OnlyDegradeRepairableClothes = false
 RealisticClothes.BaseDegradingChance = 0.0
 RealisticClothes.DegradingFactorModifier = 1.0
 RealisticClothes.ChanceToDegradeOnFailure = 0.5
@@ -30,7 +29,6 @@ function RealisticClothes.onInitMod()
     RealisticClothes.IncreaseTripChanceMultiplier = SandboxVars.RealisticClothes.IncreaseTripChanceMultiplier or 1.0
     RealisticClothes.IncreaseStiffnessMultiplier = SandboxVars.RealisticClothes.IncreaseStiffnessMultiplier or 1.0
     RealisticClothes.EnableClothesDegrading = SandboxVars.RealisticClothes.EnableClothesDegrading
-    RealisticClothes.OnlyDegradeRepairableClothes = SandboxVars.RealisticClothes.OnlyDegradeRepairableClothes
     RealisticClothes.ChanceToDegradeOnFailure = SandboxVars.RealisticClothes.ChanceToDegradeOnFailure or 0.5
 
     local minDaysToDegrade = SandboxVars.RealisticClothes.MinDaysToDegrade or 30

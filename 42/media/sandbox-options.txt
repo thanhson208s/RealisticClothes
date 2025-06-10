@@ -60,12 +60,6 @@ option RealisticClothes.EnableClothesDegrading
     page = RealisticClothes, translation = RealisticClothes_EnableClothesDegrading,
 }
 
-option RealisticClothes.OnlyDegradeRepairableClothes
-{
-    type = boolean, default = false,
-    page = RealisticClothes, translation = RealisticClothes_OnlyDegradeRepairableClothes,
-}
-
 option RealisticClothes.MinDaysToDegrade
 {
     type = integer, min = 1, max = 720, default = 30,

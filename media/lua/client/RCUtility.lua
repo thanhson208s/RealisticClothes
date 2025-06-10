@@ -805,8 +805,6 @@ function RealisticClothes.canReconditionClothes(item)
     local location = item:getBodyLocation()
     if not RealisticClothes.DegradeLocations[location] then return false end
 
-    if not RealisticClothes.getClothesFabricType(item) then return false end
-
     return true
 end
 
@@ -815,11 +813,6 @@ function RealisticClothes.canClothesDegrade(item)
 
     local location = item:getBodyLocation()
     if not RealisticClothes.DegradeLocations[location] then return false end
-
-    local fabricType = RealisticClothes.getClothesFabricType(item)
-    if RealisticClothes.OnlyDegradeRepairableClothes and not fabricType then
-        return false
-    end
 
     return true
 end
@@ -974,63 +967,74 @@ function RealisticClothes.addReconditionOption(item, player, context)
     local needle = player:getInventory():getFirstEvalRecurse(RealisticClothes.predicateNeedle)
     local scissors = player:getInventory():getFirstEvalRecurse(RealisticClothes.predicateScissors)
     local requiredThread, remainingThread, threads = RealisticClothes.getRequiredThreadToRecondition(item, player)
-    local requiredStrip, remainingStrip, strips, stripType = RealisticClothes.getRequiredStripToRecondition(item, player)
 
     local option = context:addOption(getText("IGUI_JobType_ReconditionClothes"))
     local subMenu = context:getNew(context)
     context:addSubMenu(option, subMenu)
 
-    local subOption = subMenu:addOption(getText("IGUI_JobType_Recondition_UseStrip", getItemNameFromFullType(stripType)), player, RealisticClothes.reconditionClothes, item, needle, scissors, threads, strips, requiredThread)
-    subOption.notAvailable = not (needle and scissors and threads and strips)
-    subOption.toolTip = ISInventoryPaneContextMenu.addToolTip()
-    subOption.toolTip.description = RealisticClothes.getColorForPercent(potentialRepair) .. getText("Tooltip_potentialRepair") .. " " .. math.ceil(potentialRepair * 100) .. "%"
-    subOption.toolTip.description = subOption.toolTip.description .. " <LINE>" .. RealisticClothes.getColorForPercent(successChance) .. getText("Tooltip_chanceSuccess") .. " " .. math.ceil(successChance * 100) .. "%"
-    subOption.toolTip.description = subOption.toolTip.description .. " <LINE> <LINE> <RGB:1,1,1> " .. getText("Tooltip_craft_Needs") .. ":"
-    subOption.toolTip.description = subOption.toolTip.description .. " <LINE>" .. (needle ~= nil and ISInventoryPaneContextMenu.ghs or ISInventoryPaneContextMenu.bhs) .. getItemNameFromFullType("Base.Needle")
-    subOption.toolTip.description = subOption.toolTip.description .. " <LINE>" .. (scissors ~= nil and ISInventoryPaneContextMenu.ghs or ISInventoryPaneContextMenu.bhs) .. getItemNameFromFullType("Base.Scissors")
-    subOption.toolTip.description = subOption.toolTip.description .. " <LINE>" .. (remainingThread >= requiredThread and ISInventoryPaneContextMenu.ghs or ISInventoryPaneContextMenu.bhs) .. getItemNameFromFullType("Base.Thread") .. " " .. remainingThread .. "/" .. requiredThread
-    subOption.toolTip.description = subOption.toolTip.description .. " <LINE>" .. (remainingStrip >= requiredStrip and ISInventoryPaneContextMenu.ghs or ISInventoryPaneContextMenu.bhs) .. getItemNameFromFullType(stripType) .. " " .. remainingStrip .. "/" .. requiredStrip
-    subOption.toolTip.description = subOption.toolTip.description .. " <LINE> <LINE> <RGB:1,1,0.8> " .. getText("Tooltip_weapon_Repaired") .. ": " .. (repairedTimes == 0 and getText("Tooltip_never") or (repairedTimes .. "x"))
+    if RealisticClothes.getClothesFabricType(item) then
+        local requiredStrip, remainingStrip, strips, stripType = RealisticClothes.getRequiredStripToRecondition(item, player)
+        local subOption = subMenu:addOption(getText("IGUI_JobType_Recondition_UseStrip", getItemNameFromFullType(stripType)), player, RealisticClothes.reconditionClothes, item, needle, scissors, threads, strips, requiredThread)
+        subOption.notAvailable = not (needle and scissors and threads and strips)
+        subOption.toolTip = ISInventoryPaneContextMenu.addToolTip()
+        subOption.toolTip.description = RealisticClothes.getColorForPercent(potentialRepair) .. getText("Tooltip_potentialRepair") .. " " .. math.ceil(potentialRepair * 100) .. "%"
+        subOption.toolTip.description = subOption.toolTip.description .. " <LINE>" .. RealisticClothes.getColorForPercent(successChance) .. getText("Tooltip_chanceSuccess") .. " " .. math.ceil(successChance * 100) .. "%"
+        subOption.toolTip.description = subOption.toolTip.description .. " <LINE> <LINE> <RGB:1,1,1> " .. getText("Tooltip_craft_Needs") .. ":"
+        subOption.toolTip.description = subOption.toolTip.description .. " <LINE>" .. (needle ~= nil and ISInventoryPaneContextMenu.ghs or ISInventoryPaneContextMenu.bhs) .. getItemNameFromFullType("Base.Needle")
+        subOption.toolTip.description = subOption.toolTip.description .. " <LINE>" .. (scissors ~= nil and ISInventoryPaneContextMenu.ghs or ISInventoryPaneContextMenu.bhs) .. getItemNameFromFullType("Base.Scissors")
+        subOption.toolTip.description = subOption.toolTip.description .. " <LINE>" .. (remainingThread >= requiredThread and ISInventoryPaneContextMenu.ghs or ISInventoryPaneContextMenu.bhs) .. getItemNameFromFullType("Base.Thread") .. " " .. remainingThread .. "/" .. requiredThread
+        subOption.toolTip.description = subOption.toolTip.description .. " <LINE>" .. (remainingStrip >= requiredStrip and ISInventoryPaneContextMenu.ghs or ISInventoryPaneContextMenu.bhs) .. getItemNameFromFullType(stripType) .. " " .. remainingStrip .. "/" .. requiredStrip
+        subOption.toolTip.description = subOption.toolTip.description .. " <LINE> <LINE> <RGB:1,1,0.8> " .. getText("Tooltip_weapon_Repaired") .. ": " .. (repairedTimes == 0 and getText("Tooltip_never") or (repairedTimes .. "x"))
+    end
 
     local spareItems = player:getInventory():getItemsFromType(item:getFullType(), true)
-    if spareItems:size() > 0 then
-        for i = 0, spareItems:size() - 1 do
-            local spareItem = spareItems:get(i)
-            if spareItem ~= item then
-                local spareCond = spareItem:getCondition() / spareItem:getConditionMax()
-                local sparedRepaired = spareItem:getHaveBeenRepaired() - 1
-                local effectiveCond = spareCond * 1 / (1 + 0.5 * sparedRepaired)
-                potentialRepair = RealisticClothes.getPotentialRepairUsingSpare(item, player, spareItem)
-                successChance = RealisticClothes.getSuccessChanceUsingSpare(item, player, spareItem)
+    local hasSpareItems = false
+    for i = 0, spareItems:size() - 1 do
+        local spareItem = spareItems:get(i)
+        if spareItem ~= item then
+            hasSpareItems = true
 
-                local white = ColorInfo.new(0.5, 0.5, 0.5, 1)
-                local color = ColorInfo.new(0, 0, 0, 1)
-                getCore():getGoodHighlitedColor():interp(white, 1 - effectiveCond, color)
-                local colorStr = " <RGB:" .. color:getR() .. "," .. color:getG() .. "," .. color:getB() .. "> "
+            local requiredLevel = RealisticClothes.getRequiredLevelToRecondition(item)
+            local tailoring = player:getPerkLevel(Perks.Tailoring)
+            local spareCond = spareItem:getCondition() / spareItem:getConditionMax()
+            local sparedRepaired = spareItem:getHaveBeenRepaired() - 1
+            local effectiveCond = spareCond * 1 / (1 + 0.5 * sparedRepaired)
+            potentialRepair = tailoring >= requiredLevel and RealisticClothes.getPotentialRepairUsingSpare(item, player, spareItem) or 0
+            successChance = tailoring >= requiredLevel and RealisticClothes.getSuccessChanceUsingSpare(item, player, spareItem) or 0
 
-                local name = spareItem:getName()
-                if RealisticClothes.canClothesHaveSize(spareItem) and RealisticClothes.hasModData(spareItem) then
-                    local data = RealisticClothes.getOrCreateModData(spareItem)
-                    if data and data.reveal then name = name .. ' (' .. data.size .. ')' end
-                end
-                subOption = subMenu:addOption(getText("IGUI_JobType_Recondition_UseSpare", name), player, RealisticClothes.reconditionClothesUsingSpare, item, needle, scissors, threads, spareItem, requiredThread)
-                subOption.notAvailable = not (needle and scissors and threads)
+            local white = ColorInfo.new(0.5, 0.5, 0.5, 1)
+            local color = ColorInfo.new(0, 0, 0, 1)
+            getCore():getGoodHighlitedColor():interp(white, 1 - effectiveCond, color)
+            local colorStr = " <RGB:" .. color:getR() .. "," .. color:getG() .. "," .. color:getB() .. "> "
 
-                subOption.toolTip = ISInventoryPaneContextMenu.addToolTip()
-                subOption.toolTip.description = RealisticClothes.getColorForPercent(potentialRepair) .. getText("Tooltip_potentialRepair") .. " " .. math.ceil(potentialRepair * 100) .. "%"
-                subOption.toolTip.description = subOption.toolTip.description .. " <LINE>" .. RealisticClothes.getColorForPercent(successChance) .. getText("Tooltip_chanceSuccess") .. " " .. math.ceil(successChance * 100) .. "%"
-                subOption.toolTip.description = subOption.toolTip.description .. " <LINE> <LINE> <RGB:1,1,1> " .. getText("Tooltip_craft_Needs") .. ":"
-                subOption.toolTip.description = subOption.toolTip.description .. " <LINE>" .. (needle ~= nil and ISInventoryPaneContextMenu.ghs or ISInventoryPaneContextMenu.bhs) .. getItemNameFromFullType("Base.Needle")
-                subOption.toolTip.description = subOption.toolTip.description .. " <LINE>" .. (scissors ~= nil and ISInventoryPaneContextMenu.ghs or ISInventoryPaneContextMenu.bhs) .. getItemNameFromFullType("Base.Scissors")
-                subOption.toolTip.description = subOption.toolTip.description .. " <LINE>" .. (remainingThread >= requiredThread and ISInventoryPaneContextMenu.ghs or ISInventoryPaneContextMenu.bhs) .. getItemNameFromFullType("Base.Thread") .. " " .. remainingThread .. "/" .. requiredThread
-                subOption.toolTip.description = subOption.toolTip.description .. " <LINE>" .. colorStr .. name .. " " .. ' <SPACE> (' .. math.ceil(spareCond * 100) .. '%, ' .. getText("IGUI_JobType_Recondition_RepairedTimes", sparedRepaired) .. ')'
-                subOption.toolTip.description = subOption.toolTip.description .. " <LINE> <LINE> <RGB:1,1,0.8> " .. getText("Tooltip_weapon_Repaired") .. ": " .. (repairedTimes == 0 and getText("Tooltip_never") or (repairedTimes .. "x"))
+            local name = spareItem:getName()
+            if RealisticClothes.canClothesHaveSize(spareItem) and RealisticClothes.hasModData(spareItem) then
+                local data = RealisticClothes.getOrCreateModData(spareItem)
+                if data and data.reveal then name = name .. ' (' .. data.size .. ')' end
             end
+            local subOption = subMenu:addOption(getText("IGUI_JobType_Recondition_UseSpare", name), player, RealisticClothes.reconditionClothesUsingSpare, item, needle, scissors, threads, spareItem, requiredThread)
+            subOption.notAvailable = not (needle and scissors and threads and tailoring >= requiredLevel)
+
+            subOption.toolTip = ISInventoryPaneContextMenu.addToolTip()
+            subOption.toolTip.description = RealisticClothes.getColorForPercent(potentialRepair) .. getText("Tooltip_potentialRepair") .. " " .. math.ceil(potentialRepair * 100) .. "%"
+            subOption.toolTip.description = subOption.toolTip.description .. " <LINE>" .. RealisticClothes.getColorForPercent(successChance) .. getText("Tooltip_chanceSuccess") .. " " .. math.ceil(successChance * 100) .. "%"
+            subOption.toolTip.description = subOption.toolTip.description .. " <LINE> <LINE> <RGB:1,1,1> " .. getText("Tooltip_craft_Needs") .. ":"
+            subOption.toolTip.description = subOption.toolTip.description .. " <LINE>" .. (needle ~= nil and ISInventoryPaneContextMenu.ghs or ISInventoryPaneContextMenu.bhs) .. getItemNameFromFullType("Base.Needle")
+            subOption.toolTip.description = subOption.toolTip.description .. " <LINE>" .. (scissors ~= nil and ISInventoryPaneContextMenu.ghs or ISInventoryPaneContextMenu.bhs) .. getItemNameFromFullType("Base.Scissors")
+            subOption.toolTip.description = subOption.toolTip.description .. " <LINE>" .. (remainingThread >= requiredThread and ISInventoryPaneContextMenu.ghs or ISInventoryPaneContextMenu.bhs) .. getItemNameFromFullType("Base.Thread") .. " " .. remainingThread .. "/" .. requiredThread
+            subOption.toolTip.description = subOption.toolTip.description .. " <LINE>" .. colorStr .. name .. " " .. ' <SPACE> (' .. math.ceil(spareCond * 100) .. '%, ' .. getText("IGUI_JobType_Recondition_RepairedTimes", sparedRepaired) .. ')'
+            subOption.toolTip.description = subOption.toolTip.description .. " <LINE>" .. (tailoring >= requiredLevel and ISInventoryPaneContextMenu.ghs or ISInventoryPaneContextMenu.bhs) .. PerkFactory.getPerk(Perks.Tailoring):getName() .. " " .. tailoring .. "/" .. requiredLevel
+            subOption.toolTip.description = subOption.toolTip.description .. " <LINE> <LINE> <RGB:1,1,0.8> " .. getText("Tooltip_weapon_Repaired") .. ": " .. (repairedTimes == 0 and getText("Tooltip_never") or (repairedTimes .. "x"))
         end
-    else
+    end
+
+    if not hasSpareItems then
         local name = item:getName()
-        subOption = subMenu:addOption(getText("IGUI_JobType_Recondition_UseSpare", name))
-        subOption.notAvailable = false
+        local requiredLevel = RealisticClothes.getRequiredLevelToRecondition(item)
+        local tailoring = player:getPerkLevel(Perks.Tailoring)
+
+        local subOption = subMenu:addOption(getText("IGUI_JobType_Recondition_UseSpare", name))
+        subOption.notAvailable = true
 
         subOption.toolTip = ISInventoryPaneContextMenu.addToolTip()
         subOption.toolTip.description = RealisticClothes.getColorForPercent(0.5) .. getText("Tooltip_potentialRepair") .. " ???"
@@ -1040,6 +1044,7 @@ function RealisticClothes.addReconditionOption(item, player, context)
         subOption.toolTip.description = subOption.toolTip.description .. " <LINE>" .. (scissors ~= nil and ISInventoryPaneContextMenu.ghs or ISInventoryPaneContextMenu.bhs) .. getItemNameFromFullType("Base.Scissors")
         subOption.toolTip.description = subOption.toolTip.description .. " <LINE>" .. (remainingThread >= requiredThread and ISInventoryPaneContextMenu.ghs or ISInventoryPaneContextMenu.bhs) .. getItemNameFromFullType("Base.Thread") .. " " .. remainingThread .. "/" .. requiredThread
         subOption.toolTip.description = subOption.toolTip.description .. " <LINE>" .. ISInventoryPaneContextMenu.bhs .. name
+        subOption.toolTip.description = subOption.toolTip.description .. " <LINE>" .. (tailoring >= requiredLevel and ISInventoryPaneContextMenu.ghs or ISInventoryPaneContextMenu.bhs) .. PerkFactory.getPerk(Perks.Tailoring):getName() .. " " .. tailoring .. "/" .. requiredLevel
         subOption.toolTip.description = subOption.toolTip.description .. " <LINE> <LINE> <RGB:1,1,0.8> " .. getText("Tooltip_weapon_Repaired") .. ": " .. (repairedTimes == 0 and getText("Tooltip_never") or (repairedTimes .. "x"))
     end
 end
