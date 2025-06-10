@@ -60,7 +60,7 @@ function ISReconditionClothes:perform()
 
     for _, thread in ipairs(self.threads) do
         while threadUses > 0 and RealisticClothes.getDrainableUses(thread) > 0 do
-            thread:UseAndSync()
+            RealisticClothes.useDrainable(thread)
             threadUses = threadUses - 1
         end
     end

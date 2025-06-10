@@ -13,3 +13,7 @@ end
 function RealisticClothes.getDrainableUses(item)
     return item:getRemainingUses()
 end
+
+function RealisticClothes.useDrainable(item)
+    item:Use()
+end

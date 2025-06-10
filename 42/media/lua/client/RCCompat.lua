@@ -11,3 +11,7 @@ end
 function RealisticClothes.getDrainableUses(item)
     return item:getCurrentUses()
 end
+
+function RealisticClothes.useDrainable(item)
+    item:UseAndSync()
+end
