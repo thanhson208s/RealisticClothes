@@ -466,7 +466,7 @@ do -- Modify character screen to show clothing size according to weight
                 savedFont = font
             else
                 -- draw the size label after weight value
-                local sizeStr = '(' .. RealisticClothes.getPlayerSize(self.char).name .. ')'
+                local sizeStr = '(' .. RealisticClothes.getAdditionalWeightStr(self.char) .. ')'
                 ISCharacterScreen_drawText(self, sizeStr, x + width + 2, y, 1, 1, 1, 1, font or UIFont.Small, ...)
             end
         end
@@ -477,8 +477,8 @@ do -- Modify character screen to show clothing size according to weight
         if hasWeightIcon and not hasWeightText then
             hasWeightIcon = false
             -- draw the size label after weight icon
-            local sizeStr = '(' .. RealisticClothes.getPlayerSize(self.char).name .. ')'
-            ISCharacterScreen_drawText(self, sizeStr, savedX + savedWidth + 17, savedY, 1, 1, 1, 1, savedFont or UIFont.Small, ...)
+            local sizeStr = '(' .. RealisticClothes.getAdditionalWeightStr(self.char) .. ')'
+            ISCharacterScreen_drawText(self, sizeStr, savedX + savedWidth + 18, savedY, 1, 1, 1, 1, savedFont or UIFont.Small, ...)
         end
         return ISCharacterScreen_drawTexture(self, ...)
     end

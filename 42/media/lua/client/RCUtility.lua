@@ -6,6 +6,10 @@ function RealisticClothes.debugLog(str)
     end
 end
 
+function RealisticClothes.getAdditionalWeightStr(player)
+    return RealisticClothes.getPlayerSize(player).name
+end
+
 RealisticClothes.SIZES = {
     XS = {name = 'XS', chance = 5, includes = function(x) return x <= 50 end},
     S = {name = 'S', chance = 10, includes = function(x) return x > 50 and x <= 65 end},
