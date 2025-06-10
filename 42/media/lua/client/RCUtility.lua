@@ -633,7 +633,7 @@ end
 function RealisticClothes.getColorForPercent(percent)
     local color = ColorInfo.new(0, 0, 0, 1)
     getCore():getBadHighlitedColor():interp(getCore():getGoodHighlitedColor(), percent, color)
-    return "<RGB:" .. color:getR() .. "," .. color:getG() .. "," .. color:getB() .. ">"
+    return " <RGB:" .. color:getR() .. "," .. color:getG() .. "," .. color:getB() .. "> "
 end
 
 function RealisticClothes.getUsingThreads(threads, requiredThread)
@@ -760,7 +760,7 @@ function RealisticClothes.addChangeSizeOption(item, player, context)
                     tooltip.texture = item:getTex()
                     tooltip:setName(getItemNameFromFullType(item:getFullType()) .. " (" .. nextSize.name .. ")")
 
-                    tooltip.description = " " .. RealisticClothes.getColorForPercent(successChance) .. " " .. getText("Tooltip_chanceSuccess") .. " " .. math.ceil(successChance * 100) .. "%"
+                    tooltip.description = RealisticClothes.getColorForPercent(successChance) .. getText("Tooltip_chanceSuccess") .. " " .. math.ceil(successChance * 100) .. "%"
                     tooltip.description = tooltip.description .. " <LINE> <LINE> <RGB:1,1,1> " .. getText("Tooltip_craft_Needs") .. ":"
                     tooltip.description = tooltip.description .. " <LINE>" .. (needle ~= nil and ISInventoryPaneContextMenu.ghs or ISInventoryPaneContextMenu.bhs) .. getItemNameFromFullType("Base.Needle")
                     tooltip.description = tooltip.description .. " <LINE>" .. (scissors ~= nil and ISInventoryPaneContextMenu.ghs or ISInventoryPaneContextMenu.bhs) .. getItemNameFromFullType("Base.Scissors")
@@ -786,7 +786,7 @@ function RealisticClothes.addChangeSizeOption(item, player, context)
                     tooltip.texture = item:getTex()
                     tooltip:setName(getItemNameFromFullType(item:getFullType()) .. " (" .. prevSize.name .. ")")
 
-                    tooltip.description = " " .. RealisticClothes.getColorForPercent(successChance) .. " " .. getText("Tooltip_chanceSuccess") .. " " .. math.ceil(successChance * 100) .. "%"
+                    tooltip.description = RealisticClothes.getColorForPercent(successChance) .. getText("Tooltip_chanceSuccess") .. " " .. math.ceil(successChance * 100) .. "%"
                     tooltip.description = tooltip.description .. " <LINE> <LINE> <RGB:1,1,1> " .. getText("Tooltip_craft_Needs") .. ":"
                     tooltip.description = tooltip.description .. " <LINE>" .. (needle ~= nil and ISInventoryPaneContextMenu.ghs or ISInventoryPaneContextMenu.bhs) .. getItemNameFromFullType("Base.Needle")
                     tooltip.description = tooltip.description .. " <LINE>" .. (scissors ~= nil and ISInventoryPaneContextMenu.ghs or ISInventoryPaneContextMenu.bhs) .. getItemNameFromFullType("Base.Scissors")
@@ -972,8 +972,8 @@ function RealisticClothes.addReconditionOption(item, player, context)
     local option = context:addOption(getText("IGUI_JobType_ReconditionClothes"), player, RealisticClothes.reconditionClothes, item, needle, threads, strips, requiredThread)
     option.notAvailable = not (needle and threads and strips)
     option.toolTip = ISInventoryPaneContextMenu.addToolTip()
-    option.toolTip.description = " " .. RealisticClothes.getColorForPercent(potentialRepair) .. " " .. getText("Tooltip_potentialRepair") .. " " .. math.ceil(potentialRepair * 100) .. "%"
-    option.toolTip.description = option.toolTip.description .. " <LINE> " .. RealisticClothes.getColorForPercent(successChance) .. " " .. getText("Tooltip_chanceSuccess") .. " " .. math.ceil(successChance * 100) .. "%"
+    option.toolTip.description = RealisticClothes.getColorForPercent(potentialRepair) .. getText("Tooltip_potentialRepair") .. " " .. math.ceil(potentialRepair * 100) .. "%"
+    option.toolTip.description = option.toolTip.description .. " <LINE>" .. RealisticClothes.getColorForPercent(successChance) .. getText("Tooltip_chanceSuccess") .. " " .. math.ceil(successChance * 100) .. "%"
     option.toolTip.description = option.toolTip.description .. " <LINE> <LINE> <RGB:1,1,1> " .. getText("Tooltip_craft_Needs") .. ":"
     option.toolTip.description = option.toolTip.description .. " <LINE>" .. (needle ~= nil and ISInventoryPaneContextMenu.ghs or ISInventoryPaneContextMenu.bhs) .. getItemNameFromFullType("Base.Needle")
     option.toolTip.description = option.toolTip.description .. " <LINE>" .. (remainingThread >= requiredThread and ISInventoryPaneContextMenu.ghs or ISInventoryPaneContextMenu.bhs) .. getItemNameFromFullType("Base.Thread") .. " " .. remainingThread .. "/" .. requiredThread
