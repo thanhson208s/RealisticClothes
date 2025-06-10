@@ -67,7 +67,7 @@ function ISUpsizeClothes:perform()
                 local requiredLevel = RealisticClothes.getRequiredLevelToChange(self.item, true)
                 local tailoring = self.character:getPerkLevel(Perks.Tailoring)
                 if tailoring > requiredLevel then
-                    self.item:setCondition(self.item:getCondtion() + ZombRand(math.min(tailoring - requiredLevel, 3) + 1))
+                    self.item:setCondition(self.item:getCondition() + ZombRand(math.min(tailoring - requiredLevel, 3) + 1))
                 else
                     if ZombRandFloat(0, 1) < RealisticClothes.ChanceToDegradeOnFailure then
                         self.item:setCondition(self.item:getCondition() - 1)

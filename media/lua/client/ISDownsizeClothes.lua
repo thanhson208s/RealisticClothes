@@ -67,7 +67,7 @@ function ISDownsizeClothes:perform()
                 local requiredLevel = RealisticClothes.getRequiredLevelToChange(self.item, false)
                 local tailoring = self.character:getPerkLevel(Perks.Tailoring)
                 if tailoring > requiredLevel then
-                    self.item:setCondition(self.item:getCondtion() + ZombRand(math.min(tailoring - requiredLevel, 3) + 1))
+                    self.item:setCondition(self.item:getCondition() + ZombRand(math.min(tailoring - requiredLevel, 3) + 1))
                 else
                     if ZombRandFloat(0, 1) < 0.5 then
                         self.item:setCondition(self.item:getCondition() - 1)
