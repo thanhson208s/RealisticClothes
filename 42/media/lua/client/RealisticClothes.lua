@@ -293,9 +293,9 @@ end
 
 do -- Adjust the time it takes to wear clothing based on size difference
     local ISWearClothing_new = ISWearClothing.new
-    function ISWearClothing:new(character, item, time, ...)
-        if not RealisticClothes.canClothesHaveSize(item) then 
-            return ISWearClothing_new(self, character, item, time, ...)
+    function ISWearClothing:new(character, item, ...)
+        if not RealisticClothes.canClothesHaveSize(item) or character:isTimedActionInstant() then
+            return ISWearClothing_new(self, character, item, ...)
         end
 
         local data = RealisticClothes.getOrCreateModData(item)
@@ -310,7 +310,9 @@ do -- Adjust the time it takes to wear clothing based on size difference
             timeMultiplier = 1 - 0.1 * diff
         end
 
-        return ISWearClothing_new(self, character, item, time * timeMultiplier, ...)
+        local o = ISWearClothing_new(self, character, item, ...)
+        o.maxTime = o.maxTime * timeMultiplier
+        return o
     end
 end
 
@@ -602,7 +604,7 @@ do -- Modify clothes tooltip to include size
             if injectionStage == 1 then
                 injectionStage = 2
                 originalHeight = height
-                height = height + 14
+                height = height + 16
             end
             return oldSetHeight(self, height, ...)
         end
@@ -614,14 +616,14 @@ do -- Modify clothes tooltip to include size
                 if sizeStr then
                     self.tooltip:DrawText(
                         UIFont[getCore():getOptionTooltipFont()],
-                        sizeStr, 5, originalHeight - 5,
+                        sizeStr, 7, originalHeight - 4,
                         1, 1, 1, 1
                     )
                 end
                 if degradeStr then
                     self.tooltip:DrawTextRight(
                         UIFont[getCore():getOptionTooltipFont()],
-                        degradeStr, self:getWidth() - 16, originalHeight - 5,
+                        degradeStr, self:getWidth() - 6, originalHeight - 4,
                         degradeColor:getR(), degradeColor:getG(), degradeColor:getB(), 1
                     )
                 end

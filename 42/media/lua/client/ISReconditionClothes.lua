@@ -2,13 +2,14 @@ require "TimedActions/ISBaseTimedAction"
 
 ISReconditionClothes = ISBaseTimedAction:derive("ISReconditionClothes")
 
-function ISReconditionClothes:new(character, item, needle, threads, strips, threadUses)
+function ISReconditionClothes:new(character, item, needle, scissors, threads, strips, threadUses)
     local o = {}
     setmetatable(o, self)
     self.__index = self
     o.character = character
     o.item = item
     o.needle = needle
+    o.scissors = scissors
     o.threads = threads
     o.strips = strips
     o.threadUses = threadUses
@@ -87,5 +88,5 @@ function ISReconditionClothes:isValid()
         if not inv:contains(strip) then return false end
     end
 
-    return inv:contains(self.item) and inv:contains(self.needle)
+    return inv:contains(self.item) and inv:contains(self.needle) and inv:contains(self.scissors)
 end
