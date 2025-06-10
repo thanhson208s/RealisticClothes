@@ -1064,7 +1064,7 @@ function RealisticClothes.reconditionClothes(player, item, needle, scissors, thr
     ISTimedActionQueue.add(ISReconditionClothes:new(player, item, needle, scissors, threads, strips, threadUses))
 end
 
-function RealisticClothes.reconditionClothesUsingSpare(player, item, threads, spareItem, threadUses)
+function RealisticClothes.reconditionClothesUsingSpare(player, item, needle, scissors, threads, spareItem, threadUses)
     ISInventoryPaneContextMenu.transferIfNeeded(player, needle)
     ISInventoryPaneContextMenu.transferIfNeeded(player, scissors)
     ISInventoryPaneContextMenu.transferIfNeeded(player, threads)

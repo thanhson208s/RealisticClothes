@@ -35,9 +35,9 @@ function ISReconditionClothesUsingSpare:perform()
     self.item:setJobDelta(0.0);
 
     local threadUses = self.threadUses
-    local successChance = RealisticClothes.getSuccessChanceForRecondition(self.item, self.character)
+    local successChance = RealisticClothes.getSuccessChanceUsingSpare(self.item, self.character, self.spareItem)
     if ZombRandFloat(0, 1) < successChance then
-        local potentialRepair = RealisticClothes.getPotentialRepairForRecondition(self.item, self.character)
+        local potentialRepair = RealisticClothes.getPotentialRepairUsingSpare(self.item, self.character, self.spareItem)
         local conditionGain = math.ceil(potentialRepair * (self.item:getConditionMax() - self.item:getCondition()))
         local repairedTimes = RealisticClothes.getRepairedTimes(self.item)
         self.character:getXp():AddXP(Perks.Tailoring, RealisticClothes.getTailoringXpForRecondition(self.item, true))
@@ -45,6 +45,8 @@ function ISReconditionClothesUsingSpare:perform()
 
         self.item:setCondition(self.item:getCondition() + conditionGain)
         self.item:setHaveBeenRepaired(self.item:getHaveBeenRepaired() + 1)
+
+        self.character:getInventory():Remove(self.spareItem)
     else
         if ZombRandFloat(0, 1) < RealisticClothes.ChanceToDegradeOnFailure then
             self.item:setCondition(self.item:getCondition() - 1)
