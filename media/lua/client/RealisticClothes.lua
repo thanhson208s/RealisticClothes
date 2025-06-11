@@ -14,6 +14,8 @@ RealisticClothes.DegradingFactorModifier = 1.0
 RealisticClothes.ChanceToDegradeOnFailure = 0.5
 RealisticClothes.MinDaysToDegrade = 30
 RealisticClothes.MaxDaysToDegrade = 360
+RealisticClothes.ProtectionLossEachCondition = 0.025
+RealisticClothes.ResistanceLossEachCondition = 0.05
 RealisticClothes.ListCustomClothes = {}
 RealisticClothes.Debug = false
 
@@ -44,7 +46,8 @@ function RealisticClothes.onInitMod()
     local minChance = 10 / (maxDaysToDegrade * 24)
     RealisticClothes.DegradingFactorModifier = math.log(maxChance / minChance) / math.log(2.25 / 0.2)
     RealisticClothes.BaseDegradingChance = math.sqrt(minChance * maxChance / (0.2 * 2.25) ^ RealisticClothes.DegradingFactorModifier)
-
+    RealisticClothes.ProtectionLossEachCondition = (SandboxVars.RealisticClothes.ProtectionLossEachCondition or 2.5) / 100.0
+    RealisticClothes.ResistanceLossEachCondition = (SandboxVars.RealisticClothes.ResistanceLossEachCondition or 5.0) / 100.0
     RealisticClothes.ListCustomClothes = luautils.split(SandboxVars.RealisticClothes.ListCustomClothes, ',')
 end
 Events.OnInitGlobalModData.Add(RealisticClothes.onInitMod)
@@ -245,6 +248,7 @@ function RealisticClothes.checkClothesCondition()
             local chance = RealisticClothes.calcDegradeChance(item, player)
             if ZombRandFloat(0, 1) < chance then
                 item:setCondition(item:getCondition() - 1)
+                RealisticClothes.updateClothesStats(item, player)
                 HaloTextHelper.addTextWithArrow(player, item:getScriptItem():getDisplayName(), false, HaloTextHelper.getColorRed())
 
                 if item:getCondition() <= 0 then
@@ -317,23 +321,21 @@ end
 do -- Chance to rip too tight clothing when wearing, can not wear very tight clothing
     local ISWearClothing_perform = ISWearClothing.perform
     function ISWearClothing:perform()
-        if not RealisticClothes.canClothesHaveSize(self.item) then 
-            return ISWearClothing_perform(self)
-        end
+        if RealisticClothes.canClothesHaveSize(self.item) then
+            local data = RealisticClothes.getOrCreateModData(self.item)
+            local clothesSize = RealisticClothes.getClothesSizeFromName(data.size)
+            local playerSize = RealisticClothes.getPlayerSize(self.character)
+            local diff = RealisticClothes.getSizeDiff(clothesSize, playerSize)
 
-        local data = RealisticClothes.getOrCreateModData(self.item)
-        local clothesSize = RealisticClothes.getClothesSizeFromName(data.size)
-        local playerSize = RealisticClothes.getPlayerSize(self.character)
-        local diff = RealisticClothes.getSizeDiff(clothesSize, playerSize)
+            if diff < -2 or (not data.reveal and not data.hint) then
+                data.hint = true    -- player can guess approximately the size of the clothing
+                self.character:Say(RealisticClothes.getHintFromSizeDiff(diff))
 
-        if diff < -2 or (not data.reveal and not data.hint) then
-            data.hint = true    -- player can guess approximately the size of the clothing
-            self.character:Say(RealisticClothes.getHintFromSizeDiff(diff))
-
-            if diff < -2 then
-                self.item:setJobDelta(0.0)
-                self.item:getContainer():setDrawDirty(true)
-                return
+                if diff < -2 then
+                    self.item:setJobDelta(0.0)
+                    self.item:getContainer():setDrawDirty(true)
+                    return
+                end
             end
         end
 
@@ -365,7 +367,7 @@ do -- Reset clothing stats when unequipping
     function ISUnequipAction:perform()
         local result = ISUnequipAction_perform(self)
 
-        if instanceof(self.item, "Clothing") and RealisticClothes.canClothesHaveSize(self.item) then
+        if instanceof(self.item, "Clothing") then
             RealisticClothes.updateOneClothes(self.item, self.character)
         end
 
@@ -376,7 +378,7 @@ end
 do -- Handle unequipping clothes when moving them to other containers
     local ISInventoryTransferAction_perform = ISInventoryTransferAction.perform
     function ISInventoryTransferAction:perform()
-        if not instanceof(self.item, "Clothing") or not RealisticClothes.canClothesHaveSize(self.item) then
+        if not instanceof(self.item, "Clothing") then
             return ISInventoryTransferAction_perform(self)
         end
 
@@ -385,23 +387,25 @@ do -- Handle unequipping clothes when moving them to other containers
             RealisticClothes.updateOneClothes(self.item, self.character)
         end
 
-        -- set all clothes on zombie to the same size of the first clothing initialized
-        local srcContainerType = self.srcContainer and self.srcContainer:getType() or ""
-        if srcContainerType == 'inventorymale' or srcContainerType == 'inventoryfemale' then
-            local sizeName = RealisticClothes.getRandomClothesSize().name
-            local allClothes = self.srcContainer:getItemsFromCategory("Clothing")
-            for i = 0, allClothes:size() - 1 do
-                local item = allClothes:get(i)
-                if instanceof(item, "Clothing") and RealisticClothes.canClothesHaveSize(item) then
-                    local data = RealisticClothes.getOrCreateModData(item, sizeName)
+        if RealisticClothes.canClothesHaveSize(self.item) then
+            -- set all clothes on zombie to the same size of the first clothing initialized
+            local srcContainerType = self.srcContainer and self.srcContainer:getType() or ""
+            if srcContainerType == 'inventorymale' or srcContainerType == 'inventoryfemale' then
+                local sizeName = RealisticClothes.getRandomClothesSize().name
+                local allClothes = self.srcContainer:getItemsFromCategory("Clothing")
+                for i = 0, allClothes:size() - 1 do
+                    local item = allClothes:get(i)
+                    if instanceof(item, "Clothing") and RealisticClothes.canClothesHaveSize(item) then
+                        local data = RealisticClothes.getOrCreateModData(item, sizeName)
+                    end
                 end
             end
-        end
 
-        -- clothes transfered to zombie corpes will be initialized first to prevent going through above logic
-        local destContainerType = self.destContainer and self.destContainer:getType() or ""
-        if destContainerType == 'inventorymale' or destContainerType == 'inventoryfemale' then
-            RealisticClothes.getOrCreateModData(self.item)
+            -- clothes transfered to zombie corpes will be initialized first to prevent going through above logic
+            local destContainerType = self.destContainer and self.destContainer:getType() or ""
+            if destContainerType == 'inventorymale' or destContainerType == 'inventoryfemale' then
+                RealisticClothes.getOrCreateModData(self.item)
+            end
         end
 
         return ISInventoryTransferAction_perform(self)

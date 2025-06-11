@@ -30,6 +30,7 @@ RealisticClothes.SIZE_LIST = {
 
 RealisticClothes.OriginalInsulation = {}
 RealisticClothes.OriginalCombatSpeedModifier = {}
+RealisticClothes.OriginalStats = {}
 RealisticClothes.DiffByBodyPart = {}
 RealisticClothes.DegradingChance = {}
 
@@ -448,7 +449,23 @@ function RealisticClothes.getOriginalCombatSpeedModifier(item)
     return RealisticClothes.OriginalCombatSpeedModifier[fullType]
 end
 
-function RealisticClothes.updateClothesStats(item, player, diff)
+function RealisticClothes.getOriginalStats(item)
+    local fullType = item:getFullType()
+    if not RealisticClothes.OriginalStats[fullType] then
+        local sampleItem = RealisticClothes.createItem(fullType)
+        RealisticClothes.OriginalStats[fullType] = {
+            biteDefense = sampleItem:getBiteDefense() or 0,
+            scratchDefense = sampleItem:getScratchDefense() or 0,
+            bulletDefense = sampleItem:getBulletDefense() or 0,
+            windResistance = sampleItem:getWindresistance() or 0,
+            waterResistance = sampleItem:getWaterResistance() or 0
+        }
+    end
+
+    return RealisticClothes.OriginalStats[fullType]
+end
+
+function RealisticClothes.updateClothesForDiff(item, player, diff)
     local insulation = RealisticClothes.getOriginalInsulation(item)
     local combatMod = RealisticClothes.getOriginalCombatSpeedModifier(item)
 
@@ -473,6 +490,38 @@ function RealisticClothes.updateClothesStats(item, player, diff)
 
     item:setInsulation(math.min(insulation, 1))
     item:setCombatSpeedModifier(math.max(combatMod, 0.5))
+end
+
+function RealisticClothes.updateClothesStats(item, player)
+    local itemStats = RealisticClothes.getOriginalStats(item)
+    local biteDefense = itemStats.biteDefense
+    local scratchDefense = itemStats.scratchDefense
+    local bulletDefense = itemStats.bulletDefense
+    local windResistance = itemStats.windResistance
+    local waterResistance = itemStats.waterResistance
+
+    if player:isEquippedClothing(item) then
+        local lossCond = item:getConditionMax() - item:getCondition()
+        local remainProtection = math.max(0, 1 - lossCond * RealisticClothes.ProtectionLossEachCondition)
+        local remainResistance = math.max(0, 1 - lossCond * RealisticClothes.ResistanceLossEachCondition)
+        biteDefense = biteDefense * remainProtection
+        scratchDefense = scratchDefense * remainProtection
+        bulletDefense = bulletDefense * remainProtection
+        windResistance = windResistance * remainResistance
+        waterResistance = waterResistance * remainResistance
+    end
+
+    -- Disable this feature if config set to 0
+    if RealisticClothes.ProtectionLossEachCondition > 0 then
+        item:setBiteDefense(biteDefense)
+        item:setScratchDefense(scratchDefense)
+        item:setBulletDefense(bulletDefense)
+    end
+    -- Disable this feature if config set to 0
+    if RealisticClothes.ResistanceLossEachCondition > 0 then 
+        item:setWindresistance(windResistance)
+        item:setWaterResistance(waterResistance)
+    end
 end
 
 function RealisticClothes.updateAllClothes(player)
@@ -518,18 +567,28 @@ function RealisticClothes.updateAllClothes(player)
                 player:Say(ZombRand(2) == 0 and getText("IGUI_Say_Nofit_Clothes0") or getText("IGUI_Say_Nofit_Clothes1"))
             end
 
-            RealisticClothes.updateClothesStats(item, player, diff)
+            RealisticClothes.updateClothesForDiff(item, player, diff)
+        end
+        
+        if item and RealisticClothes.canClothesDegrade(item) then
+            RealisticClothes.updateClothesStats(item, player)
         end
     end
 end
 
 function RealisticClothes.updateOneClothes(item, player)
-    local data = RealisticClothes.getOrCreateModData(item)
-    local clothesSize = RealisticClothes.getClothesSizeFromName(data.size)
-    local playerSize = RealisticClothes.getPlayerSize(player)
-    local diff = RealisticClothes.getSizeDiff(clothesSize, playerSize)
+    if RealisticClothes.canClothesHaveSize(item) then
+        local data = RealisticClothes.getOrCreateModData(item)
+        local clothesSize = RealisticClothes.getClothesSizeFromName(data.size)
+        local playerSize = RealisticClothes.getPlayerSize(player)
+        local diff = RealisticClothes.getSizeDiff(clothesSize, playerSize)
 
-    RealisticClothes.updateClothesStats(item, player, diff)
+        RealisticClothes.updateClothesForDiff(item, player, diff)
+    end
+
+    if RealisticClothes.canClothesDegrade(item) then
+        RealisticClothes.updateClothesStats(item, player)
+    end
 end
 
 function RealisticClothes.ripClothes(item, player)
@@ -549,7 +608,9 @@ function RealisticClothes.ripClothes(item, player)
     local part = candidateParts[ZombRand(#candidateParts) + 1]
     visual:setHole(part)
     item:removePatch(part)
-    item:setCondition(math.max(item:getCondition() - item:getCondLossPerHole()))
+    if not RealisticClothes.canClothesDegrade(item) then
+        item:setCondition(math.max(item:getCondition() - item:getCondLossPerHole()))
+    end
 
     player:getEmitter():playSound("TightClothesRip")
     return true
@@ -835,14 +896,16 @@ function RealisticClothes.calcDegradeChance(item, player)
     end
     local diffFactor = 0.5 + 2 / (4 + diff)     -- 1 - 1.5
 
-    local biteDefense = math.max(0, math.min(100, item:getBiteDefense() or 0.0)) / 100
-    local scratchDefense = math.max(0, math.min(100, item:getScratchDefense() or 0.0)) / 100
-    local bulletDefense = math.max(0, math.min(100, item:getBulletDefense() or 0.0)) / 100
+    local itemStats = RealisticClothes.getOriginalStats(item)
+
+    local biteDefense = math.max(0, math.min(100, itemStats.biteDefense)) / 100
+    local scratchDefense = math.max(0, math.min(100, itemStats.scratchDefense)) / 100
+    local bulletDefense = math.max(0, math.min(100, itemStats.bulletDefense)) / 100
     local defenseFactor = math.min(0.5, (biteDefense * 4 + bulletDefense * 2 + scratchDefense) / 7) / 0.5
     defenseFactor = 1 - 0.2 * math.sqrt(defenseFactor)          -- 0.8 - 1
 
-    local windResistance = item:getWindresistance() or 0.0      -- 0-1
-    local waterResistance = item:getWaterResistance() or 0.0    -- 0-1
+    local windResistance = itemStats.windResistance             -- 0-1
+    local waterResistance = itemStats.waterResistance           -- 0-1
     local resistanceFactor = math.min(0.75, (waterResistance + windResistance) / 2) / 0.75
     resistanceFactor = 1 - 0.5 * math.sqrt(resistanceFactor)    -- 0.5 - 1
 
@@ -949,14 +1012,14 @@ end
 
 function RealisticClothes.getPotentialRepairUsingSpare(item, player, spareItem)
     local potentialRepair = RealisticClothes.getPotentialRepairForRecondition(item, player)
-    potentialRepair = potentialRepair + 0.1 * spareItem:getCondition() * 1 / (1 + 0.5 * (RealisticClothes.getRepairedTimes(spareItem)))
+    potentialRepair = potentialRepair + 0.05 * spareItem:getCondition() * 1 / (1 + 0.5 * RealisticClothes.getRepairedTimes(spareItem)) / (1 + 0.25 * RealisticClothes.getRepairedTimes(item))
 
     return math.max(0, math.min(1, potentialRepair))
 end
 
 function RealisticClothes.getSuccessChanceUsingSpare(item, player, spareItem)
     local successChance = RealisticClothes.getSuccessChanceForRecondition(item, player)
-    successChance = successChance + 0.1 * spareItem:getCondition() * 1 / (1 + 0.5 * (RealisticClothes.getRepairedTimes(spareItem)))
+    successChance = successChance + 0.05 * spareItem:getCondition() * 1 / (1 + 0.5 * RealisticClothes.getRepairedTimes(spareItem)) / (1 + 0.1 * RealisticClothes.getRepairedTimes(item))
 
     return math.max(0, math.min(1, successChance))
 end

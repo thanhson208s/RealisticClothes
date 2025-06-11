@@ -78,6 +78,18 @@ option RealisticClothes.ChanceToDegradeOnFailure
     page = RealisticClothes, translation = RealisticClothes_ChanceToDegradeOnFailure,
 }
 
+option RealisticClothes.ProtectionLossEachCondition
+{
+    type = double, min = 0.0, max = 100.0, default = 2.5,
+    page = RealisticClothes, translation = RealisticClothes_ProtectionLossEachCondition,
+}
+
+option RealisticClothes.ResistanceLossEachCondition
+{
+    type = double, min = 0.0, max = 100.0, default = 5.0,
+    page = RealisticClothes, translation = RealisticClothes_ResistanceLossEachCondition,
+}
+
 option RealisticClothes.ListCustomClothes
 {
     type = string, default = ,
