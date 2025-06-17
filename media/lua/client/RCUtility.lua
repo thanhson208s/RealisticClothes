@@ -776,7 +776,7 @@ end
 
 function RealisticClothes.predicateNeedle(item)
     if item:isBroken() then return false end
-    return item:hasTag("Needle") or item:getType() == "Needle"
+    return item:hasTag("SewingNeedle") or item:getType() == "Needle"
 end
 
 function RealisticClothes.predicateScissors(item)

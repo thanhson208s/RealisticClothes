@@ -309,7 +309,7 @@ do -- Adjust the time it takes to wear clothing based on size difference
 
         local timeMultiplier = 1.0
         if diff < 0 then        -- the smaller the clothing, the longer it takes to wear
-            timeMultiplier = 1 + 0.25 * 2^(math.abs(diff) - 1)
+            timeMultiplier = 1 + 0.25 * 2^(math.abs(diff or 0) - 1)
         elseif diff > 0 then    -- the bigger the clothing, the shorter it takes to wear
             timeMultiplier = 1 - 0.1 * diff
         end
@@ -622,7 +622,7 @@ do -- Modify clothes tooltip to include size
                         1, 1, 1, 1
                     )
                 end
-                if degradeStr then
+                if degradeStr and degradeColor then
                     self.tooltip:DrawTextRight(
                         UIFont[getCore():getOptionTooltipFont()],
                         degradeStr, self:getWidth() - 16, originalHeight - 5,
