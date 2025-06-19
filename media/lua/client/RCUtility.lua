@@ -917,7 +917,6 @@ function RealisticClothes.calcDegradeChance(item, player)
 
     local totalFactor = damageFactor * defenseFactor * resistanceFactor * skillFactor * diffFactor
     local chance = RealisticClothes.BaseDegradingChance * totalFactor ^ RealisticClothes.DegradingFactorModifier
-    RealisticClothes.debugLog(item:getDisplayName() .. string.format(" factor:%.8f", totalFactor) .. string.format(" chance:%.8f", chance))
 
     RealisticClothes.DegradingChance[item] = chance
     return chance

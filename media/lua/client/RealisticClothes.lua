@@ -75,10 +75,6 @@ function RealisticClothes.onFillInvObjMenu(playerId, context, items)
         if RealisticClothes.canReconditionClothes(clothingItem) then
             RealisticClothes.addReconditionOption(clothingItem, player, context)
         end
-
-        RealisticClothes.debugLog('condition: ' .. tostring(clothingItem:getCondition()) .. '|' .. tostring(clothingItem:getConditionMax()))
-        RealisticClothes.debugLog('insulation: ' .. tostring(clothingItem:getInsulation()) .. '|' .. tostring(RealisticClothes.getOriginalInsulation(clothingItem)))
-        RealisticClothes.debugLog('combat speed modifier: ' .. tostring(clothingItem:getCombatSpeedModifier()) .. '|' .. tostring(RealisticClothes.getOriginalCombatSpeedModifier(clothingItem)))
     end
 
     RealisticClothes.addCheckSizeOption(items, player, context)

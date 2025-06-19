@@ -924,7 +924,6 @@ function RealisticClothes.calcDegradeChance(item, player)
 
     local totalFactor = damageFactor * defenseFactor * resistanceFactor * skillFactor * diffFactor
     local chance = RealisticClothes.BaseDegradingChance * totalFactor ^ RealisticClothes.DegradingFactorModifier
-    RealisticClothes.debugLog(item:getDisplayName() .. string.format(" factor:%.8f", totalFactor) .. string.format(" chance:%.8f", chance))
 
     RealisticClothes.DegradingChance[item] = chance
     return chance
@@ -1167,7 +1166,7 @@ function RealisticClothes.addChooseSizeOption(items, player, context)
                 for j = 2, #v.items do
                     local e = v.items[j]
                     if instanceof(e, "Clothing") and RealisticClothes.canClothesHaveSize(e) then
-                        if RealisticClothes.hasModData(e) or RealisticClothes.getOrCreateModData(e).size == "" then
+                        if RealisticClothes.hasModData(e) and not RealisticClothes.getOrCreateModData(e).size then
                             table.insert(listClothes, e)
                         end
                     end
@@ -1175,7 +1174,7 @@ function RealisticClothes.addChooseSizeOption(items, player, context)
             end
         else
             if instanceof(v, "Clothing") and RealisticClothes.canClothesHaveSize(v) then
-                if RealisticClothes.hasModData(v) or not RealisticClothes.getOrCreateModData(v).size then
+                if RealisticClothes.hasModData(v) and not RealisticClothes.getOrCreateModData(v).size then
                     table.insert(listClothes, v)
                 end
             end
