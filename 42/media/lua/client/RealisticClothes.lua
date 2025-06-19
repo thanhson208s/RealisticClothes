@@ -82,6 +82,7 @@ function RealisticClothes.onFillInvObjMenu(playerId, context, items)
     end
 
     RealisticClothes.addCheckSizeOption(items, player, context)
+    RealisticClothes.addChooseSizeOption(items, player, context)
 end
 Events.OnFillInventoryObjectContextMenu.Add(RealisticClothes.onFillInvObjMenu)
 
@@ -302,20 +303,26 @@ do -- Adjust the time it takes to wear clothing based on size difference
             return ISWearClothing_new(self, character, item, ...)
         end
 
-        local data = RealisticClothes.getOrCreateModData(item)
-        local clothesSize = RealisticClothes.getClothesSizeFromName(data.size)
-        local playerSize = RealisticClothes.getPlayerSize(character)
-        local diff = RealisticClothes.getSizeDiff(clothesSize, playerSize)
+        local o = ISWearClothing_new(self, character, item, ...)
 
-        local timeMultiplier = 1.0
-        if diff < 0 then        -- the smaller the clothing, the longer it takes to wear
-            timeMultiplier = 1 + 0.25 * 2^(math.abs(diff or 0) - 1)
-        elseif diff > 0 then    -- the bigger the clothing, the shorter it takes to wear
-            timeMultiplier = 1 - 0.1 * diff
+        local data = RealisticClothes.getOrCreateModData(item)
+        if data.size then
+            local clothesSize = RealisticClothes.getClothesSizeFromName(data.size)
+            local playerSize = RealisticClothes.getPlayerSize(character)
+            local diff = RealisticClothes.getSizeDiff(clothesSize, playerSize)
+
+            local timeMultiplier = 1.0
+            if diff < 0 then        -- the smaller the clothing, the longer it takes to wear
+                timeMultiplier = 1 + 0.25 * 2^(math.abs(diff or 0) - 1)
+            elseif diff > 0 then    -- the bigger the clothing, the shorter it takes to wear
+                timeMultiplier = 1 - 0.1 * diff
+            end
+
+            o.maxTime = o.maxTime * timeMultiplier
+        else
+            o.ignoreAction = true   -- can not wear crafted clothes with unassigned size
         end
 
-        local o = ISWearClothing_new(self, character, item, ...)
-        o.maxTime = o.maxTime * timeMultiplier
         return o
     end
 end
@@ -546,24 +553,30 @@ do -- Modify clothes tooltip to include size
         end
 
         local sizeStr = nil
+        local sizeColor = ColorInfo.new(1, 1, 1, 1)
         local degradeStr = nil
-        local degradeColor = nil
+        local degradeColor = ColorInfo.new(0, 0, 0, 1)
         if RealisticClothes.canClothesHaveSize(self.item) then
             sizeStr = "???"
             if RealisticClothes.hasModData(self.item) then
                 local data = RealisticClothes.getOrCreateModData(self.item)
-                local clothesSize = RealisticClothes.getClothesSizeFromName(data.size)
-                local playerSize = RealisticClothes.getPlayerSize(player)
-                local diff = RealisticClothes.getSizeDiff(clothesSize, playerSize)
+                if data.size then
+                    local clothesSize = RealisticClothes.getClothesSizeFromName(data.size)
+                    local playerSize = RealisticClothes.getPlayerSize(player)
+                    local diff = RealisticClothes.getSizeDiff(clothesSize, playerSize)
 
-                if data.reveal then
-                    sizeStr = clothesSize.name .. (data.resized ~= 0 and '*' or '') .. ' ' .. RealisticClothes.getHintText(diff)
-                elseif data.hint then
-                    sizeStr = RealisticClothes.getHintText(diff)
-                end
+                    if data.reveal then
+                        sizeStr = clothesSize.name .. (data.resized ~= 0 and '*' or '') .. ' ' .. RealisticClothes.getHintText(diff)
+                    elseif data.hint then
+                        sizeStr = RealisticClothes.getHintText(diff)
+                    end
 
-                if RealisticClothes.Debug then
-                    sizeStr = sizeStr .. ' [' .. tostring(data.size) .. '-' .. tostring(data.reveal) .. '-' .. tostring(data.hint) .. '-' .. tostring(data.resized) .. ']'
+                    if RealisticClothes.Debug then
+                        sizeStr = sizeStr .. ' [' .. tostring(data.size) .. '-' .. tostring(data.reveal) .. '-' .. tostring(data.hint) .. '-' .. tostring(data.resized) .. ']'
+                    end
+                else
+                    sizeStr = getText("IGUI_Say_Unchosen_Clothes_Size")
+                    sizeColor = getCore():getBadHighlitedColor():interp(getCore():getGoodHighlitedColor(), 0.5, sizeColor)
                 end
             end
         end
@@ -621,10 +634,10 @@ do -- Modify clothes tooltip to include size
                     self.tooltip:DrawText(
                         UIFont[getCore():getOptionTooltipFont()],
                         sizeStr, 7, originalHeight - 4,
-                        1, 1, 1, 1
+                        sizeColor:getR(), sizeColor:getG(), sizeColor:getB(), 1
                     )
                 end
-                if degradeStr and degradeColor then
+                if degradeStr then
                     self.tooltip:DrawTextRight(
                         UIFont[getCore():getOptionTooltipFont()],
                         degradeStr, self:getWidth() - 6, originalHeight - 4,
@@ -655,7 +668,7 @@ do -- Replace display name of inventory items to include clothes size
             local name = Clothing_getName(self)
             if RealisticClothes.canClothesHaveSize(self) and RealisticClothes.hasModData(self) then
                 local data = RealisticClothes.getOrCreateModData(self)
-                if data.reveal then name = name .. ' (' .. data.size .. ')' end
+                if data.reveal and data.size then name = name .. ' (' .. data.size .. ')' end
             end
             return name
         end
@@ -716,5 +729,96 @@ do -- Replace display name of inventory items to include clothes size
         end
 
         return result
+    end
+end
+
+do -- crafted clothes will have nil size, players need to manually assign a size
+    local ISHandcraftAction_recurIdx = 0
+    local Actions_addOrDropItem = nil
+
+    local ISHandcraftAction_performRecipe = ISHandcraftAction.performRecipe
+    function ISHandcraftAction:performRecipe()
+        if ISHandcraftAction_recurIdx == 0 and not Actions_addOrDropItem then
+            Actions_addOrDropItem = Actions.addOrDropItem
+            Actions.addOrDropItem = function(character, item, ...)
+                if instanceof (item, "Clothing") and RealisticClothes.canClothesHaveSize(item) then
+                    local data = RealisticClothes.getOrCreateModData(item)
+                    data.size = RealisticClothes.getCraftSize(item:getFullType(), nil)
+                    data.reveal = true
+                    data.hint = true
+                end
+
+                Actions_addOrDropItem(character, item, ...)
+            end
+        end
+
+        ISHandcraftAction_recurIdx = ISHandcraftAction_recurIdx + 1
+        ISHandcraftAction_performRecipe(self)
+        ISHandcraftAction_recurIdx = ISHandcraftAction_recurIdx - 1
+
+        if ISHandcraftAction_recurIdx == 0 and Actions_addOrDropItem then
+            Actions.addOrDropItem = Actions_addOrDropItem
+            Actions_addOrDropItem = nil
+        end
+    end
+end
+
+do
+    local ISWidgetOutput_createScriptValues = ISWidgetOutput.createScriptValues
+    function ISWidgetOutput:createScriptValues(script, isSecondary, ...)
+        local table = ISWidgetOutput_createScriptValues(self, script, isSecondary, ...)
+
+        local output = table.outputObjects:get(0)
+        if not isSecondary and output:getType() == Type.Clothing and RealisticClothes.canClothesHaveSize(output) then
+            local FONT_SCALE = getTextManager():getFontHeight(UIFont.Small) / 19
+            local ICON_SCALE = math.max(1, math.floor(FONT_SCALE))
+
+            table.selectOutputButton = ISXuiSkin.build(self.xuiSkin, "S_NeedsAStyle", ISButton, 0, 0, 15 * ICON_SCALE, 20 * ICON_SCALE, "XXX")
+            table.selectOutputButton.borderColor = {r=0, g=0, b=0, a=0};
+            table.selectOutputButton.backgroundColor = {r=0.8, g=0.8, b=0.8, a=1};
+            table.selectOutputButton.backgroundColorMouseOver = {r=0.365, g=0.196, b=0.125, a=1};
+            table.selectOutputButton.textColor = {r=0, g=0, b=0, a=1};
+            table.selectOutputButton.font = UIFont.Small
+            table.selectOutputButton.enable = true
+            table.selectOutputButton.onclick = ISWidgetOutput.onButtonClick
+            table.selectOutputButton.target = self;
+
+            table.selectOutputButton:initialise();
+            table.selectOutputButton:instantiate();
+            self:addChild(table.selectOutputButton)
+        end
+
+        return table
+    end
+
+    local ISWidgetOutput_updateScriptValues = ISWidgetOutput.updateScriptValues
+    function ISWidgetOutput:updateScriptValues(table, ...)
+        ISWidgetOutput_updateScriptValues(self, table, ...)
+
+        if table.selectOutputButton then
+            local output = table.outputObjects:get(0)
+            if output:getType() == Type.Clothing and RealisticClothes.canClothesHaveSize(output) then
+                table.selectOutputButton:setTitle(RealisticClothes.getCraftSize(output:getFullName(), RealisticClothes.getPlayerSize(self.player).name))
+            end
+        end
+    end
+
+    local ISWidgetOutput_calculateLayout = ISWidgetOutput.calculateLayout
+    function ISWidgetOutput:calculateLayout(preferredWidth, preferredHeight, ...)
+        ISWidgetOutput_calculateLayout(self, preferredWidth, preferredHeight, ...)
+
+        if self.primary and self.primary.selectOutputButton then
+            self.primary.selectOutputButton:setX(self.iconBorderSizeX - self.primary.selectOutputButton:getWidth())
+            self.primary.selectOutputButton:setY(0)
+        end
+    end
+
+    function ISWidgetOutput:onButtonClick(button)
+        if self.primary and self.primary.selectOutputButton and self.primary.selectOutputButton == button then
+            local output = self.primary.outputObjects:get(0)
+            if output:getType() == Type.Clothing and RealisticClothes.canClothesHaveSize(output) then
+                button:setTitle(RealisticClothes.newCraftSize(output:getFullName(), RealisticClothes.getPlayerSize(self.player).name))
+            end
+        end
     end
 end

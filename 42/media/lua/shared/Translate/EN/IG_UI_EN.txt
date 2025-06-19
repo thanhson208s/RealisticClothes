@@ -13,7 +13,8 @@ IGUI_EN = {
 	IGUI_JobType_ReconditionClothes = "Recondition",
 	IGUI_JobType_Recondition_UseStrip = "Use %1",
 	IGUI_JobType_Recondition_UseSpare = "Use %1",
-	IGUI_JobType_Recondition_RepairedTimes = "%1 repairs"
+	IGUI_JobType_Recondition_RepairedTimes = "%1 repairs",
+	IGUI_JobType_ChooseClothesSize = "Choose clothes size",
 	IGUI_RealisticClothes_BarelyDegrading = "Barely degrading",
 	IGUI_RealisticClothes_SlowlyDegrading = "Slowly degrading",
 	IGUI_RealisticClothes_NormallyDegrading = "Normally degrading",
@@ -41,6 +42,7 @@ IGUI_EN = {
 	IGUI_Say_Hint_Loose1 = "Feels a little baggy",
 	IGUI_Say_Hint_Very_Loose0 = "Feels like I'm wearing a poncho",
 	IGUI_Say_Hint_Very_Loose1 = "I'm swimming in these pants",
+	IGUI_Say_Unchosen_Clothes_Size = "Unchosen size",
 
 	IGUI_Say_Dropped_Pants0 = "Well... there go my pants",
 	IGUI_Say_Dropped_Pants1 = "Note to self: belts are not optional...",

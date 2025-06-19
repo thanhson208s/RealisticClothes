@@ -794,7 +794,7 @@ end
 function RealisticClothes.addChangeSizeOption(item, player, context)
     if RealisticClothes.hasModData(item) and not item:isBroken() then
         local data = RealisticClothes.getOrCreateModData(item)
-        if data.reveal and data.resized == 0 then
+        if data.size and data.reveal and data.resized == 0 then
             local nextSize = RealisticClothes.getNextSize(data.size)
             local prevSize = RealisticClothes.getPrevSize(data.size)
             if nextSize or prevSize then
@@ -1084,7 +1084,7 @@ function RealisticClothes.addReconditionOption(item, player, context)
             local name = getItemNameFromFullType(spareItem:getFullType())
             if RealisticClothes.canClothesHaveSize(spareItem) and RealisticClothes.hasModData(spareItem) then
                 local data = RealisticClothes.getOrCreateModData(spareItem)
-                if data and data.reveal then name = name .. ' (' .. data.size .. ')' end
+                if data and data.reveal and data.size then name = name .. ' (' .. data.size .. ')' end
             end
             local subOption = subMenu:addOption(getText("IGUI_JobType_Recondition_UseSpare", name), player, RealisticClothes.reconditionClothesUsingSpare, item, needle, scissors, threads, spareItem, requiredThread)
             subOption.notAvailable = not (needle and scissors and threads and tailoring >= requiredLevel)
@@ -1157,4 +1157,74 @@ function RealisticClothes.getRequiredLevelToRecondition(item)
     if not RealisticClothes.NeedTailoringLevel then return 0 end
 
     return RealisticClothes.DegradeLocations[item:getBodyLocation()]
+end
+
+function RealisticClothes.addChooseSizeOption(items, player, context)
+    local listClothes = {}
+    for _, v in ipairs(items) do
+        if type(v) == 'table' then
+            if v.items and #v.items > 1 then
+                for j = 2, #v.items do
+                    local e = v.items[j]
+                    if instanceof(e, "Clothing") and RealisticClothes.canClothesHaveSize(e) then
+                        if RealisticClothes.hasModData(e) or RealisticClothes.getOrCreateModData(e).size == "" then
+                            table.insert(listClothes, e)
+                        end
+                    end
+                end
+            end
+        else
+            if instanceof(v, "Clothing") and RealisticClothes.canClothesHaveSize(v) then
+                if RealisticClothes.hasModData(v) or not RealisticClothes.getOrCreateModData(v).size then
+                    table.insert(listClothes, v)
+                end
+            end
+        end
+    end
+
+    if #listClothes > 0 then
+        local option = context:addOption(getText("IGUI_JobType_ChooseClothesSize"))
+        local subMenu = context:new(context)
+        context:addSubMenu(option, subMenu)
+
+        for _, size in ipairs(RealisticClothes.SIZE_LIST) do
+            subMenu:addOption(size.name, player, RealisticClothes.chooseClothesSize, listClothes, size.name)
+        end
+    end
+end
+
+function RealisticClothes.chooseClothesSize(player, items, size)
+    for _, item in ipairs(items) do
+        local data = RealisticClothes.getOrCreateModData(item)
+        data.size = size
+        data.reveal = true
+        data.hint = true
+    end
+
+    player:getInventory():setDrawDirty(true)
+end
+
+RealisticClothes.CraftSize = {}
+
+function RealisticClothes.getCraftSize(fullType, preferedSize)
+    if not RealisticClothes.CraftSize[fullType] then
+        RealisticClothes.CraftSize[fullType] = preferedSize
+    end
+
+    return RealisticClothes.CraftSize[fullType]
+end
+
+function RealisticClothes.newCraftSize(fullType, preferedSize)
+    local curSize = RealisticClothes.getCraftSize(fullType, preferedSize)
+
+    local index = RealisticClothes.getSizeIndex(curSize)
+    local newSize = preferedSize
+    if index then
+        index = index + 1
+        if index > #RealisticClothes.SIZE_LIST then index = 1 end
+        newSize = RealisticClothes.SIZE_LIST[index].name
+    end
+
+    RealisticClothes.CraftSize[fullType] = newSize
+    return newSize
 end
