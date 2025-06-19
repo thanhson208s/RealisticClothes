@@ -742,6 +742,7 @@ do -- crafted clothes will have nil size, players need to manually assign a size
                     data.size = RealisticClothes.getCraftSize(item:getFullType(), nil)
                     data.reveal = true
                     data.hint = true
+                    data.resized = 0
                 end
 
                 Actions_addOrDropItem(character, item, ...)
