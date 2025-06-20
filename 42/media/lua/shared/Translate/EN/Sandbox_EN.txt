@@ -34,5 +34,5 @@ Sandbox_EN = {
     Sandbox_RealisticClothes_ResistanceLossEachCondition = "Resistance loss each condition",
     Sandbox_RealisticClothes_ResistanceLossEachCondition_tooltip = "Percentage of base resistance (wind resistance, water resistance) loss for each condition loss",
     Sandbox_RealisticClothes_ListCustomClothes = "List custom clothes",
-    Sandbox_RealisticClothes_ListCustomClothes_tooltip = "Clothes that you think should have sizes but are not in this mod, separated by comma. <LINE> For example: Base.Clothing1,Base.Clothing2,Base.Clothing3",
+    Sandbox_RealisticClothes_ListCustomClothes_tooltip = "Clothing items that you think should have sizes but are not in this mod and (optionally) their corresponding difficulties (must be 1 or 2 or 3), separated by comma. <LINE> For example: Base.Clothing0,Base.Clothing1:1,Base.Clothing2:2,Base.Clothing3:3",
 }

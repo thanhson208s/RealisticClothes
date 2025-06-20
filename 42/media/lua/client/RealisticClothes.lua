@@ -48,7 +48,29 @@ function RealisticClothes.onInitMod()
     RealisticClothes.BaseDegradingChance = math.sqrt(minChance * maxChance / (0.2 * 2.25) ^ RealisticClothes.DegradingFactorModifier)
     RealisticClothes.ProtectionLossEachCondition = (SandboxVars.RealisticClothes.ProtectionLossEachCondition or 2.5) / 100.0
     RealisticClothes.ResistanceLossEachCondition = (SandboxVars.RealisticClothes.ResistanceLossEachCondition or 5.0) / 100.0
-    RealisticClothes.ListCustomClothes = luautils.split(SandboxVars.RealisticClothes.ListCustomClothes, ',')
+
+    RealisticClothes.ListCustomClothes = {}
+    local pairs = luautils.split(luautils.trim(SandboxVars.RealisticClothes.ListCustomClothes), ',')
+    for _, pair in ipairs(pairs) do
+        -- Split each pair into name and (optional) quantity
+        local parts = luautils.split(luautils.trim(pair), ":")
+        local name = luautils.trim(parts[1] or "")
+        local quantity = 1
+
+        -- Try to get the quantity if provided
+        if #parts == 2 then
+            local qtyStr = luautils.trim(parts[2])
+            local qtyNum = tonumber(qtyStr)
+            -- Accept only positive integers
+            if qtyNum and qtyNum > 0 and math.floor(qtyNum) == qtyNum then
+                quantity = qtyNum
+            end
+        end
+
+        if name ~= "" then
+            RealisticClothes.ListCustomClothes[name] = quantity
+        end
+    end
 end
 Events.OnInitGlobalModData.Add(RealisticClothes.onInitMod)
 
@@ -630,7 +652,7 @@ do -- Modify clothes tooltip to include size
                     self.tooltip:DrawText(
                         UIFont[getCore():getOptionTooltipFont()],
                         sizeStr, 7, originalHeight - 4,
-                        sizeColor:getR(), sizeColor:getG(), sizeColor:getB(), 1
+                        1, 1, 1, 1
                     )
                 end
                 if degradeStr then
@@ -765,8 +787,16 @@ do
     function ISWidgetOutput:createScriptValues(script, isSecondary, ...)
         local table = ISWidgetOutput_createScriptValues(self, script, isSecondary, ...)
 
-        local output = table.outputObjects:get(0)
-        if not isSecondary and output:getType() == Type.Clothing and RealisticClothes.canClothesHaveSize(output) then
+        local outputHaveSize = false
+        for i = 0, table.outputObjects:size() - 1 do
+            local output = table.outputObjects:get(i)
+            if output:getType() == Type.Clothing and RealisticClothes.canOutputHaveSize(output) then
+                outputHaveSize = true
+                break
+            end
+        end
+
+        if not isSecondary and outputHaveSize then
             local FONT_SCALE = getTextManager():getFontHeight(UIFont.Small) / 19
             local ICON_SCALE = math.max(1, math.floor(FONT_SCALE))
 
@@ -793,9 +823,17 @@ do
         ISWidgetOutput_updateScriptValues(self, table, ...)
 
         if table.selectOutputButton then
-            local output = table.outputObjects:get(0)
-            if output:getType() == Type.Clothing and RealisticClothes.canClothesHaveSize(output) then
+            local index = 0
+            if table.cycleIcons then
+                local playerIndex = self.player:getPlayerNum();
+                index = UIManager.getSyncedIconIndex(playerIndex, table.outputObjects:size());
+            end
+            local output = table.outputObjects:get(index)
+            if output:getType() == Type.Clothing and RealisticClothes.canOutputHaveSize(output) then
+                table.selectOutputButton:setVisible(true)
                 table.selectOutputButton:setTitle(RealisticClothes.getCraftSize(output:getFullName(), RealisticClothes.getPlayerSize(self.player).name))
+            else
+                table.selectOutputButton:setVisible(false)
             end
         end
     end
@@ -812,9 +850,17 @@ do
 
     function ISWidgetOutput:onButtonClick(button)
         if self.primary and self.primary.selectOutputButton and self.primary.selectOutputButton == button then
-            local output = self.primary.outputObjects:get(0)
-            if output:getType() == Type.Clothing and RealisticClothes.canClothesHaveSize(output) then
+            local index = 0
+            if self.primary.cycleIcons then
+                local playerIndex = self.player:getPlayerNum();
+                index = UIManager.getSyncedIconIndex(playerIndex, self.primary.outputObjects:size());
+            end
+            local output = self.primary.outputObjects:get(index)
+            if output:getType() == Type.Clothing and RealisticClothes.canOutputHaveSize(output) then
+                button:setVisible(true)
                 button:setTitle(RealisticClothes.newCraftSize(output:getFullName(), RealisticClothes.getPlayerSize(self.player).name))
+            else
+                button:setVisible(false)
             end
         end
     end

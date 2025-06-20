@@ -48,7 +48,29 @@ function RealisticClothes.onInitMod()
     RealisticClothes.BaseDegradingChance = math.sqrt(minChance * maxChance / (0.2 * 2.25) ^ RealisticClothes.DegradingFactorModifier)
     RealisticClothes.ProtectionLossEachCondition = (SandboxVars.RealisticClothes.ProtectionLossEachCondition or 2.5) / 100.0
     RealisticClothes.ResistanceLossEachCondition = (SandboxVars.RealisticClothes.ResistanceLossEachCondition or 5.0) / 100.0
-    RealisticClothes.ListCustomClothes = luautils.split(SandboxVars.RealisticClothes.ListCustomClothes, ',')
+
+    RealisticClothes.ListCustomClothes = {}
+    local pairs = luautils.split(luautils.trim(SandboxVars.RealisticClothes.ListCustomClothes), ',')
+    for _, pair in ipairs(pairs) do
+        -- Split each pair into name and (optional) quantity
+        local parts = luautils.split(luautils.trim(pair), ":")
+        local name = luautils.trim(parts[1] or "")
+        local quantity = 1
+
+        -- Try to get the quantity if provided
+        if #parts == 2 then
+            local qtyStr = luautils.trim(parts[2])
+            local qtyNum = tonumber(qtyStr)
+            -- Accept only positive integers
+            if qtyNum and qtyNum > 0 and math.floor(qtyNum) == qtyNum then
+                quantity = qtyNum
+            end
+        end
+
+        if name ~= "" then
+            RealisticClothes.ListCustomClothes[name] = quantity
+        end
+    end
 end
 Events.OnInitGlobalModData.Add(RealisticClothes.onInitMod)
 

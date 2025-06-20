@@ -297,20 +297,25 @@ function RealisticClothes.getStripType(fabricType)
     return nil
 end
 
+function RealisticClothes.getClothesDifficulty(item)
+    local slot = RealisticClothes.CLOTHES_SLOTS[item:getBodyLocation()]
+    return slot and slot.difficulty or (RealisticClothes.ListCustomClothes[item:getFullType()] or 1)
+end
+
 function RealisticClothes.getRequiredLevelToCheck(item)
     if not RealisticClothes.NeedTailoringLevel then return 0 end
 
-    return math.max(RealisticClothes.CLOTHES_SLOTS[item:getBodyLocation()].difficulty - 1, 0)
+    return math.max(RealisticClothes.getClothesDifficulty(item) - 1, 0)
 end
 
 function RealisticClothes.getCheckDuration(item)
-    return math.max(1, RealisticClothes.CLOTHES_SLOTS[item:getBodyLocation()].difficulty * 50 * RealisticClothes.ActionTimeMultiplier)
+    return math.max(1, RealisticClothes.getClothesDifficulty(item) * 50 * RealisticClothes.ActionTimeMultiplier)
 end
 
 function RealisticClothes.getRequiredLevelToChange(item, isUpsizing)
     if not RealisticClothes.NeedTailoringLevel then return 0 end
 
-    local difficulty = RealisticClothes.CLOTHES_SLOTS[item:getBodyLocation()].difficulty
+    local difficulty = RealisticClothes.getClothesDifficulty(item)
     difficulty = difficulty + (RealisticClothes.FabricTypeDifficulty[item:getScriptItem():getFabricType()] or 0)
     if isUpsizing then difficulty = difficulty + 1 end
 
@@ -318,7 +323,7 @@ function RealisticClothes.getRequiredLevelToChange(item, isUpsizing)
 end
 
 function RealisticClothes.getChangeDuration(item, isUpsizing)
-    local duration = RealisticClothes.CLOTHES_SLOTS[item:getBodyLocation()].difficulty * 150
+    local duration = RealisticClothes.getClothesDifficulty(item) * 150
     duration = duration + (RealisticClothes.FabricTypeDifficulty[item:getScriptItem():getFabricType()] or 0) * 75
     if isUpsizing then duration = duration + 300 end
 
@@ -330,7 +335,7 @@ function RealisticClothes.getSuccessChanceForChange(tailoring, requiredLevel)
 end
 
 function RealisticClothes.getTailoringXpForChange(item, isUpsizing, isSuccess)
-    local xp = RealisticClothes.CLOTHES_SLOTS[item:getBodyLocation()].difficulty * 5
+    local xp = RealisticClothes.getClothesDifficulty(item) * 5
     xp = xp + (RealisticClothes.FabricTypeDifficulty[item:getScriptItem():getFabricType()] or 0) * 2.5
     if isUpsizing then xp = xp + 10 end
 
@@ -338,37 +343,22 @@ function RealisticClothes.getTailoringXpForChange(item, isUpsizing, isSuccess)
 end
 
 function RealisticClothes.getRequiredStripCount(item)
-    local location = item:getBodyLocation()
-    if RealisticClothes.CLOTHES_SLOTS[location] then
-        return RealisticClothes.CLOTHES_SLOTS[location].difficulty * 2
-    end
-    return 0
+    return RealisticClothes.getClothesDifficulty(item) * 2
 end
 
 function RealisticClothes.getRequiredPaperclip(item)
-    local location = item:getBodyLocation()
-    if RealisticClothes.CLOTHES_SLOTS[location] then
-        return RealisticClothes.CLOTHES_SLOTS[location].difficulty * 2
-    end
-    return 0
+    return RealisticClothes.getClothesDifficulty(item) * 2
 end
 
 function RealisticClothes.getRequiredThreadCount(item)
-    local location = item:getBodyLocation()
-    if RealisticClothes.CLOTHES_SLOTS[location] then
-        return RealisticClothes.CLOTHES_SLOTS[location].difficulty * 2
-    end
-    return 0
+    return RealisticClothes.getClothesDifficulty(item) * 2
 end
 
 function RealisticClothes.canClothesHaveSize(item)
     local location = item:getBodyLocation()
-    if RealisticClothes.CLOTHES_SLOTS[location] == nil then
+    if not RealisticClothes.CLOTHES_SLOTS[location] then
         local itemType = item:getFullType()
-        for _, clothesType in ipairs(RealisticClothes.ListCustomClothes) do
-            if clothesType == itemType then return true end
-        end
-        return false
+        return RealisticClothes.ListCustomClothes[itemType] ~= nil
     end
     return true
 end
@@ -378,33 +368,33 @@ function RealisticClothes.canResizeClothes(item)
 end
 
 function RealisticClothes.canClothesRip(item)
-    local location = item:getBodyLocation()
-    return RealisticClothes.CLOTHES_SLOTS[location] and RealisticClothes.CLOTHES_SLOTS[location].canRip
+    local slot = RealisticClothes.CLOTHES_SLOTS[item:getBodyLocation()]
+    return slot and slot.canRip
 end
 
 function RealisticClothes.canClothesDrop(item)
-    local location = item:getBodyLocation()
-    return RealisticClothes.CLOTHES_SLOTS[location] and RealisticClothes.CLOTHES_SLOTS[location].canDrop
+    local slot = RealisticClothes.CLOTHES_SLOTS[item:getBodyLocation()]
+    return slot and slot.canDrop
 end
 
 function RealisticClothes.doesClothesHaveInsulationMod(item)
-    local location = item:getBodyLocation()
-    return RealisticClothes.CLOTHES_SLOTS[location] and RealisticClothes.CLOTHES_SLOTS[location].insulationMod
+    local slot = RealisticClothes.CLOTHES_SLOTS[item:getBodyLocation()]
+    return slot and slot.insulationMod
 end
 
 function RealisticClothes.doesClothesHaveCombatMod(item)
-    local location = item:getBodyLocation()
-    return RealisticClothes.CLOTHES_SLOTS[location] and RealisticClothes.CLOTHES_SLOTS[location].combatMod
+    local slot = RealisticClothes.CLOTHES_SLOTS[item:getBodyLocation()]
+    return slot and slot.combatMod
 end
 
 function RealisticClothes.doesClothesIncreaseTrip(item)
-    local location = item:getBodyLocation()
-    return RealisticClothes.CLOTHES_SLOTS[location] and RealisticClothes.CLOTHES_SLOTS[location].incTrip
+    local slot = RealisticClothes.CLOTHES_SLOTS[item:getBodyLocation()]
+    return slot and slot.incTrip
 end
 
 function RealisticClothes.doesClothesIncreaseStiffness(item)
-    local location = item:getBodyLocation()
-    return RealisticClothes.CLOTHES_SLOTS[location] and RealisticClothes.CLOTHES_SLOTS[location].incStiffness
+    local slot = RealisticClothes.CLOTHES_SLOTS[item:getBodyLocation()]
+    return slot and slot.incStiffness
 end
 
 function RealisticClothes.getClothesRipChance(diff)
