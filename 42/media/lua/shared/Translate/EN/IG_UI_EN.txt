@@ -21,6 +21,7 @@ IGUI_EN = {
 	IGUI_RealisticClothes_FastDegrading = "Fast degrading",
 	IGUI_RealisticClothes_RapidDegrading = "Rapid degrading",
 	IGUI_RealisticClothes_DaysRemaining = "Approx. %1 days remaining",
+	IGUI_RealisticClothes_NoSize = "Doesn't have size"
 
 	IGUI_Say_Label_Very_Tight0 = "This is size %1, it looks way too small for me",
 	IGUI_Say_Label_Very_Tight1 = "This is size %1, no way I'd fit in this",

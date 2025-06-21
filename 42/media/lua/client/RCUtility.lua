@@ -373,9 +373,8 @@ end
 function RealisticClothes.canOutputHaveSize(item)
     local location = item:getBodyLocation()
     if not RealisticClothes.CLOTHES_SLOTS[location] then
-        -- local itemType = item:getFullName()
-        -- return RealisticClothes.ListCustomClothes[itemType] ~= nil
-        return false
+        local itemType = item:getFullName()
+        return RealisticClothes.ListCustomClothes[itemType] ~= nil
     end
     return true
 end

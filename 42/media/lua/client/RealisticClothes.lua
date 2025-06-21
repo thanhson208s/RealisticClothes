@@ -807,8 +807,22 @@ do
             table.selectOutputButton.textColor = {r=0, g=0, b=0, a=1};
             table.selectOutputButton.font = UIFont.Small
             table.selectOutputButton.enable = true
-            table.selectOutputButton.onclick = ISWidgetOutput.onButtonClick
             table.selectOutputButton.target = self;
+            table.selectOutputButton.onclick = function(widget, button)
+                if widget.primary and widget.primary.selectOutputButton and widget.primary.selectOutputButton == button then
+                    button:setVisible(false)
+                    if widget.interactiveMode and widget.outputScript:getResourceType() == ResourceType.Item and widget.logic and widget.logic:isManualSelectInputs() then
+                        local mapper = widget.outputScript:getOutputMapper();
+                        local output = mapper:getOutputItem(widget.logic:getRecipeData(), true);
+                        if output:getType() == Type.Clothing and RealisticClothes.canOutputHaveSize(output) then
+                            button:setVisible(true)
+                            if not widget.logic:isCraftActionInProgress() then
+                                button:setTitle(RealisticClothes.newCraftSize(output:getFullName(), RealisticClothes.getPlayerSize(widget.player).name))
+                            end
+                        end
+                    end
+                end
+            end
 
             table.selectOutputButton:initialise();
             table.selectOutputButton:instantiate();
@@ -823,17 +837,14 @@ do
         ISWidgetOutput_updateScriptValues(self, table, ...)
 
         if table.selectOutputButton then
-            local index = 0
-            if table.cycleIcons then
-                local playerIndex = self.player:getPlayerNum();
-                index = UIManager.getSyncedIconIndex(playerIndex, table.outputObjects:size());
-            end
-            local output = table.outputObjects:get(index)
-            if output:getType() == Type.Clothing and RealisticClothes.canOutputHaveSize(output) then
-                table.selectOutputButton:setVisible(true)
-                table.selectOutputButton:setTitle(RealisticClothes.getCraftSize(output:getFullName(), RealisticClothes.getPlayerSize(self.player).name))
-            else
-                table.selectOutputButton:setVisible(false)
+            table.selectOutputButton:setVisible(false)
+            if self.interactiveMode and self.outputScript:getResourceType() == ResourceType.Item and self.logic and self.logic:isManualSelectInputs() then
+                local mapper = self.outputScript:getOutputMapper();
+                local output = mapper:getOutputItem(self.logic:getRecipeData(), true);
+                if output and output:getType() == Type.Clothing and RealisticClothes.canOutputHaveSize(output) then
+                    table.selectOutputButton:setVisible(true)
+                    table.selectOutputButton:setTitle(RealisticClothes.getCraftSize(output:getFullName(), RealisticClothes.getPlayerSize(self.player).name))
+                end
             end
         end
     end
@@ -847,21 +858,26 @@ do
             self.primary.selectOutputButton:setY(0)
         end
     end
+end
 
-    function ISWidgetOutput:onButtonClick(button)
-        if self.primary and self.primary.selectOutputButton and self.primary.selectOutputButton == button then
-            local index = 0
-            if self.primary.cycleIcons then
-                local playerIndex = self.player:getPlayerNum();
-                index = UIManager.getSyncedIconIndex(playerIndex, self.primary.outputObjects:size());
-            end
-            local output = self.primary.outputObjects:get(index)
-            if output:getType() == Type.Clothing and RealisticClothes.canOutputHaveSize(output) then
-                button:setVisible(true)
-                button:setTitle(RealisticClothes.newCraftSize(output:getFullName(), RealisticClothes.getPlayerSize(self.player).name))
+do
+    ISInventoryPaneContextMenu_doWearClothingTooltip = ISInventoryPaneContextMenu.doWearClothingTooltip
+    function ISInventoryPaneContextMenu.doWearClothingTooltip(player, item, extra, option, ...)
+        local result = ISInventoryPaneContextMenu_doWearClothingTooltip(player, item, extra, option, ...)
+
+        if instanceof(item, "Clothing") and RealisticClothes.canClothesHaveSize(item) and RealisticClothes.hasModData(item) then
+            local data = RealisticClothes.getOrCreateModData(item)
+            if not data.size then
+                option.toolTip.description = option.toolTip.description .. ISInventoryPaneContextMenu.bhs .. getText("IGUI_RealisticClothes_NoSize") .. " <LINE> "
+                option.notAvailable = true
             else
-                button:setVisible(false)
+                local playerSize = RealisticClothes.getPlayerSize(player)
+                local clothesSize = RealisticClothes.getClothesSizeFromName(data.size)
+                local diff = RealisticClothes.getSizeDiff(clothesSize, playerSize)
+                option.toolTip.description = option.toolTip.description .. " <RGB:1,1,1> " .. RealisticClothes.getHintText(diff) .. " <LINE> "
             end
         end
+
+        return result
     end
 end
