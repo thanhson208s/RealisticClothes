@@ -472,6 +472,8 @@ function RealisticClothes.getOriginalStats(item)
 end
 
 function RealisticClothes.updateClothesForDiff(item, player, diff)
+    if not (item and instanceof(item, "Clothing")) then return end
+
     local insulation = RealisticClothes.getOriginalInsulation(item)
     local combatMod = RealisticClothes.getOriginalCombatSpeedModifier(item)
 
@@ -499,6 +501,8 @@ function RealisticClothes.updateClothesForDiff(item, player, diff)
 end
 
 function RealisticClothes.updateClothesStats(item, player)
+    if not (item and instanceof(item, "Clothing")) then return end
+
     local itemStats = RealisticClothes.getOriginalStats(item)
     local biteDefense = itemStats.biteDefense
     local scratchDefense = itemStats.scratchDefense
@@ -551,7 +555,7 @@ function RealisticClothes.updateAllClothes(player)
 
     for i = 0, list:size() - 1 do
         local item = list:getItemByIndex(i)
-        if item and RealisticClothes.canClothesHaveSize(item) then
+        if item and instanceof(item, "Clothing") and RealisticClothes.canClothesHaveSize(item) then
             local data = RealisticClothes.getOrCreateModData(item)
             local clothesSize = RealisticClothes.getClothesSizeFromName(data.size)
             local diff = RealisticClothes.getSizeDiff(clothesSize, playerSize)
@@ -576,7 +580,7 @@ function RealisticClothes.updateAllClothes(player)
             RealisticClothes.updateClothesForDiff(item, player, diff)
         end
 
-        if item and RealisticClothes.canClothesDegrade(item) then
+        if item and instanceof(item, "Clothing") and RealisticClothes.canClothesDegrade(item) then
             RealisticClothes.updateClothesStats(item, player)
         end
     end

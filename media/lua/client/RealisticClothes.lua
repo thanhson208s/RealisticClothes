@@ -68,7 +68,11 @@ function RealisticClothes.onInitMod()
         end
 
         if name ~= "" then
-            RealisticClothes.ListCustomClothes[name] = quantity
+            -- Check if item exists and is a clothing item
+            local item = ScriptManager.instance:getItem(name)
+            if item and item:getType() == Type.Clothing then
+                RealisticClothes.ListCustomClothes[name] = quantity
+            end
         end
     end
 end
@@ -113,7 +117,7 @@ function RealisticClothes.onCreatePlayer(playerId)
     local sizeName = RealisticClothes.getPlayerSize(player).name
     for i = 0, list:size() - 1 do
         local item = list:getItemByIndex(i)
-        if item and RealisticClothes.canClothesHaveSize(item) then
+        if item and instanceof(item, "Clothing") and RealisticClothes.canClothesHaveSize(item) then
             local data = RealisticClothes.getOrCreateModData(item, sizeName)
             data.hint = true
         end
@@ -196,7 +200,7 @@ function RealisticClothes.onPlayerClimb(player, state)
     local extraTripChance = 0
     for i = 0, list:size() - 1 do
         local item = list:getItemByIndex(i)
-        if item and RealisticClothes.canClothesHaveSize(item) then
+        if item and instanceof(item, "Clothing") and RealisticClothes.canClothesHaveSize(item) then
             local data = RealisticClothes.getOrCreateModData(item)
             local clothesSize = RealisticClothes.getClothesSizeFromName(data.size)
             local diff = RealisticClothes.getSizeDiff(clothesSize, playerSize)
