@@ -267,7 +267,7 @@ function RealisticClothes.checkClothesCondition()
     local items = player:getWornItems()
     for i = 0, items:size() - 1 do
         local item = items:getItemByIndex(i)
-        if item and instanceof(item, "Clothing") and instanceof(item, "Clothing") and RealisticClothes.canClothesDegrade(item) then
+        if item and instanceof(item, "Clothing") and RealisticClothes.canClothesDegrade(item) then
             local chance = RealisticClothes.calcDegradeChance(item, player)
             if ZombRandFloat(0, 1) < chance then
                 item:setCondition(item:getCondition() - 1)
