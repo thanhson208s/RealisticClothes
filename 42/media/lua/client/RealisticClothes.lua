@@ -870,6 +870,11 @@ do
         local result = ISInventoryPaneContextMenu_doWearClothingTooltip(player, item, extra, option, ...)
 
         if instanceof(item, "Clothing") and RealisticClothes.canClothesHaveSize(item) and RealisticClothes.hasModData(item) then
+            if not option.toolTip then
+                option.toolTip = ISInventoryPaneContextMenu.addToolTip()
+                option.toolTip.maxLineWidth = 1000
+            end
+
             local data = RealisticClothes.getOrCreateModData(item)
             if not data.size then
                 option.toolTip.description = option.toolTip.description .. ISInventoryPaneContextMenu.bhs .. getText("IGUI_RealisticClothes_NoSize") .. " <LINE> "
